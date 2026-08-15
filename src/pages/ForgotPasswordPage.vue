@@ -1,7 +1,22 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from 'vue'
 import { ArrowLeft, ArrowRight, CheckCircle2, Eye, EyeOff, KeyRound, Mail, ShieldCheck, Sparkles } from 'lucide-vue-next'
+import { api } from '@/lib/http'
+import type { ApiEnvelope } from '@/lib/auth'
+import { apiErrorMessage } from '@/lib/auth'
 import '@/auth-pages.css'
+
+interface CodeResult {
+  expires_in: number
+  resend_after: number
+  code_length: number
+  message: string
+}
+
+interface ResetResult {
+  updated: boolean
+  sessions_revoked: boolean
+}
 
 const email = ref('')
 const code = ref('')
@@ -12,19 +27,16 @@ const showConfirmation = ref(false)
 const countdown = ref(0)
 const notice = ref('')
 const error = ref('')
+const sendingCode = ref(false)
+const submitting = ref(false)
 let timer: number | undefined
 
-const canSendCode = computed(() => /.+@.+\..+/.test(email.value) && countdown.value === 0)
+const canSendCode = computed(() => /.+@.+\..+/.test(email.value) && countdown.value === 0 && !sendingCode.value)
 
-function sendCode() {
-  error.value = ''
-  notice.value = ''
-  if (!/.+@.+\..+/.test(email.value)) {
-    error.value = '请先填写注册该游戏账号时使用的邮箱。'
-    return
-  }
-  countdown.value = 60
-  notice.value = '验证码发送交互已就绪，接入商城 Go 后端后将由 SDK 邮箱服务实际发送。'
+function startCountdown(seconds: number) {
+  if (timer)
+    window.clearInterval(timer)
+  countdown.value = Math.max(1, seconds || 60)
   timer = window.setInterval(() => {
     countdown.value -= 1
     if (countdown.value <= 0 && timer) {
@@ -34,7 +46,31 @@ function sendCode() {
   }, 1000)
 }
 
-function submit() {
+async function sendCode() {
+  error.value = ''
+  notice.value = ''
+  if (!/.+@.+\..+/.test(email.value)) {
+    error.value = '请先填写注册该游戏账号时使用的邮箱。'
+    return
+  }
+
+  sendingCode.value = true
+  try {
+    const response = await api.post<ApiEnvelope<CodeResult>>('/v1/auth/password/reset/email-code', {
+      email: email.value.trim(),
+    })
+    startCountdown(response.data.data.resend_after)
+    notice.value = response.data.data.message || '如果该邮箱已注册，验证码将发送到邮箱。'
+  }
+  catch (cause) {
+    error.value = apiErrorMessage(cause, '验证码发送失败，请稍后重试。')
+  }
+  finally {
+    sendingCode.value = false
+  }
+}
+
+async function submit() {
   error.value = ''
   notice.value = ''
   if (!email.value.trim() || !code.value.trim()) {
@@ -49,7 +85,28 @@ function submit() {
     error.value = '两次输入的新密码不一致。'
     return
   }
-  notice.value = '重置表单已通过前端校验。接入 Go 后端后将调用 SDK 重置密码并注销旧会话。'
+
+  submitting.value = true
+  try {
+    const response = await api.post<ApiEnvelope<ResetResult>>('/v1/auth/password/reset', {
+      email: email.value.trim(),
+      code: code.value.trim(),
+      new_password: password.value,
+      confirm_password: confirmation.value,
+    })
+    notice.value = response.data.data.sessions_revoked
+      ? '密码已重置，旧登录会话已失效。现在可以使用新密码登录。'
+      : '密码已重置，现在可以使用新密码登录。'
+    code.value = ''
+    password.value = ''
+    confirmation.value = ''
+  }
+  catch (cause) {
+    error.value = apiErrorMessage(cause, '密码重置失败，请稍后重试。')
+  }
+  finally {
+    submitting.value = false
+  }
 }
 
 onUnmounted(() => {
@@ -101,7 +158,7 @@ onUnmounted(() => {
             <span>邮箱验证码</span>
             <div class="auth-code-row">
               <div class="auth-input"><ShieldCheck /><input v-model="code" inputmode="numeric" maxlength="8" placeholder="输入邮箱验证码"></div>
-              <button class="auth-code-button" type="button" :disabled="!canSendCode" @click="sendCode">{{ countdown > 0 ? `${countdown}s 后重发` : '发送验证码' }}</button>
+              <button class="auth-code-button" type="button" :disabled="!canSendCode" @click="sendCode">{{ sendingCode ? '发送中...' : (countdown > 0 ? `${countdown}s 后重发` : '发送验证码') }}</button>
             </div>
           </label>
 
@@ -128,7 +185,7 @@ onUnmounted(() => {
             <span><CheckCircle2 /> 游戏与商城密码同步更新</span>
           </div>
 
-          <button class="auth-submit" type="submit">重置密码 <ArrowRight /></button>
+          <button class="auth-submit" type="submit" :disabled="submitting">{{ submitting ? '重置中...' : '重置密码' }} <ArrowRight v-if="!submitting" /></button>
           <p class="auth-helper">想起密码了？<RouterLink to="/login">返回登录</RouterLink><span>·</span><RouterLink to="/register">注册新账号</RouterLink></p>
         </form>
       </section>

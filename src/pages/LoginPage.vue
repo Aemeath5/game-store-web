@@ -3,7 +3,17 @@ import { ref } from 'vue'
 import { ArrowRight, Eye, EyeOff, LockKeyhole, ShieldCheck, Sparkles, UserRound } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
+import { api } from '@/lib/http'
+import type { ApiEnvelope, AuthUser } from '@/lib/auth'
+import { apiErrorMessage, saveAccessToken } from '@/lib/auth'
 import '@/auth-pages.css'
+
+interface LoginResult {
+  access_token: string
+  token_type: string
+  expires_in: number
+  user: AuthUser
+}
 
 const router = useRouter()
 const app = useAppStore()
@@ -11,10 +21,33 @@ const account = ref('')
 const password = ref('')
 const remember = ref(true)
 const showPassword = ref(false)
+const loading = ref(false)
+const error = ref('')
 
-function login() {
-  app.mockLogin()
-  router.push('/')
+async function login() {
+  error.value = ''
+  if (!account.value.trim() || !password.value) {
+    error.value = '请输入账号和密码。'
+    return
+  }
+
+  loading.value = true
+  try {
+    const response = await api.post<ApiEnvelope<LoginResult>>('/v1/auth/sdk/login', {
+      account: account.value.trim(),
+      password: password.value,
+    })
+    const result = response.data.data
+    saveAccessToken(result.access_token, remember.value)
+    app.setAuthenticatedUser(result.user)
+    await router.push('/')
+  }
+  catch (cause) {
+    error.value = apiErrorMessage(cause, '登录失败，请稍后重试。')
+  }
+  finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -37,7 +70,7 @@ function login() {
         </div>
         <div class="auth-steps">
           <div class="auth-step"><span><ShieldCheck /></span><div><strong>平台担保</strong><small>订单全流程留痕</small></div></div>
-          <div class="auth-step"><span><LockKeyhole /></span><div><strong>账户安全</strong><small>敏感信息由服务端统一处理</small></div></div>
+          <div class="auth-step"><span><LockKeyhole /></span><div><strong>账户安全</strong><small>账号密码由 HK4E SDK 验证</small></div></div>
         </div>
       </section>
 
@@ -48,6 +81,8 @@ function login() {
         </div>
 
         <form class="auth-form" @submit.prevent="login">
+          <p v-if="error" class="auth-notice error">{{ error }}</p>
+
           <label class="auth-field">
             <span>账号</span>
             <div class="auth-input"><UserRound /><input v-model="account" autocomplete="username" placeholder="用户名 / 邮箱"></div>
@@ -67,9 +102,9 @@ function login() {
             <RouterLink to="/forgot-password">忘记密码？</RouterLink>
           </div>
 
-          <button class="auth-submit" type="submit">登录 <ArrowRight /></button>
+          <button class="auth-submit" type="submit" :disabled="loading">{{ loading ? '登录中...' : '登录' }} <ArrowRight v-if="!loading" /></button>
           <p class="auth-helper">还没有游戏账号？<RouterLink to="/register">立即注册</RouterLink></p>
-          <p class="login-demo-note">当前登录仍为前端演示；商城 Go 后端接入 SDK 后启用真实账号验证。</p>
+          <p class="login-demo-note">使用游戏账号登录；未创建游戏角色的账号会提示先进入游戏创建角色。</p>
         </form>
       </section>
     </main>

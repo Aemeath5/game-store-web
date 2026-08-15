@@ -1,7 +1,22 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from 'vue'
 import { ArrowLeft, ArrowRight, CheckCircle2, Eye, EyeOff, Mail, ShieldCheck, Sparkles, UserRound } from 'lucide-vue-next'
+import { api } from '@/lib/http'
+import type { ApiEnvelope } from '@/lib/auth'
+import { apiErrorMessage } from '@/lib/auth'
 import '@/auth-pages.css'
+
+interface CodeResult {
+  expires_in: number
+  resend_after: number
+  code_length: number
+}
+
+interface RegisterResult {
+  account_uid: number
+  next_step: string
+  message: string
+}
 
 const username = ref('')
 const email = ref('')
@@ -13,19 +28,16 @@ const showConfirmation = ref(false)
 const countdown = ref(0)
 const notice = ref('')
 const error = ref('')
+const sendingCode = ref(false)
+const submitting = ref(false)
 let timer: number | undefined
 
-const canSendCode = computed(() => /.+@.+\..+/.test(email.value) && countdown.value === 0)
+const canSendCode = computed(() => /.+@.+\..+/.test(email.value) && countdown.value === 0 && !sendingCode.value)
 
-function sendCode() {
-  error.value = ''
-  notice.value = ''
-  if (!/.+@.+\..+/.test(email.value)) {
-    error.value = '请先填写正确的邮箱地址。'
-    return
-  }
-  countdown.value = 60
-  notice.value = '验证码发送交互已就绪，接入商城 Go 后端后将由 SDK 邮箱服务实际发送。'
+function startCountdown(seconds: number) {
+  if (timer)
+    window.clearInterval(timer)
+  countdown.value = Math.max(1, seconds || 60)
   timer = window.setInterval(() => {
     countdown.value -= 1
     if (countdown.value <= 0 && timer) {
@@ -35,7 +47,31 @@ function sendCode() {
   }, 1000)
 }
 
-function submit() {
+async function sendCode() {
+  error.value = ''
+  notice.value = ''
+  if (!/.+@.+\..+/.test(email.value)) {
+    error.value = '请先填写正确的邮箱地址。'
+    return
+  }
+
+  sendingCode.value = true
+  try {
+    const response = await api.post<ApiEnvelope<CodeResult>>('/v1/auth/register/email-code', {
+      email: email.value.trim(),
+    })
+    startCountdown(response.data.data.resend_after)
+    notice.value = '验证码已发送，请检查邮箱。'
+  }
+  catch (cause) {
+    error.value = apiErrorMessage(cause, '验证码发送失败，请稍后重试。')
+  }
+  finally {
+    sendingCode.value = false
+  }
+}
+
+async function submit() {
   error.value = ''
   notice.value = ''
   if (!username.value.trim() || !email.value.trim() || !code.value.trim()) {
@@ -50,7 +86,24 @@ function submit() {
     error.value = '两次输入的密码不一致。'
     return
   }
-  notice.value = '注册表单已通过前端校验。接入 Go 后端后将创建同一套 HK4E SDK 游戏账号。'
+
+  submitting.value = true
+  try {
+    const response = await api.post<ApiEnvelope<RegisterResult>>('/v1/auth/register', {
+      username: username.value.trim(),
+      email: email.value.trim(),
+      email_code: code.value.trim(),
+      password: password.value,
+      confirm_password: confirmation.value,
+    })
+    notice.value = response.data.data.message || '账号创建成功，请先进入游戏创建角色后再登录商城。'
+  }
+  catch (cause) {
+    error.value = apiErrorMessage(cause, '注册失败，请稍后重试。')
+  }
+  finally {
+    submitting.value = false
+  }
 }
 
 onUnmounted(() => {
@@ -107,7 +160,7 @@ onUnmounted(() => {
             <span>邮箱验证码</span>
             <div class="auth-code-row">
               <div class="auth-input"><ShieldCheck /><input v-model="code" inputmode="numeric" maxlength="8" placeholder="输入邮箱验证码"></div>
-              <button class="auth-code-button" type="button" :disabled="!canSendCode" @click="sendCode">{{ countdown > 0 ? `${countdown}s 后重发` : '发送验证码' }}</button>
+              <button class="auth-code-button" type="button" :disabled="!canSendCode" @click="sendCode">{{ sendingCode ? '发送中...' : (countdown > 0 ? `${countdown}s 后重发` : '发送验证码') }}</button>
             </div>
           </label>
 
@@ -134,7 +187,7 @@ onUnmounted(() => {
             <span><CheckCircle2 /> 两次密码必须一致</span>
           </div>
 
-          <button class="auth-submit" type="submit">创建游戏账号 <ArrowRight /></button>
+          <button class="auth-submit" type="submit" :disabled="submitting">{{ submitting ? '创建中...' : '创建游戏账号' }} <ArrowRight v-if="!submitting" /></button>
           <p class="auth-helper">已经有账号？<RouterLink to="/login">立即登录</RouterLink></p>
         </form>
       </section>

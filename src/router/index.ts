@@ -16,6 +16,7 @@ import AdminProductsPage from '@/pages/admin/AdminProductsPage.vue'
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage.vue'
 import AdminUsersPage from '@/pages/admin/AdminUsersPage.vue'
 import AdminSettingsPage from '@/pages/admin/AdminSettingsPage.vue'
+import { getAccessToken } from '@/lib/auth'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -37,6 +38,7 @@ const router = createRouter({
     {
       path: '/',
       component: AppLayout,
+      meta: { requiresAuth: true },
       children: [
         { path: '', name: 'dashboard', component: DashboardPage },
         { path: 'market', name: 'market', component: MarketPage },
@@ -48,6 +50,22 @@ const router = createRouter({
       ],
     },
   ],
+})
+
+router.beforeEach((to) => {
+  const token = getAccessToken()
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+
+  if (requiresAuth && !token) {
+    return {
+      path: '/login',
+      query: to.fullPath === '/' ? undefined : { redirect: to.fullPath },
+      replace: true,
+    }
+  }
+
+  if (to.path === '/login' && token)
+    return { path: '/', replace: true }
 })
 
 export default router

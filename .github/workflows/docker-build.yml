@@ -35,7 +35,7 @@ jobs:
         run: docker build --tag game-market-web:test .
 
       - name: Start container on port 19090
-        run: docker run --detach --name game-market-web-test --publish 19090:80 game-market-web:test
+        run: docker run --detach --name game-market-web-test --add-host host.docker.internal:host-gateway --publish 19090:80 game-market-web:test
 
       - name: Verify health endpoint
         run: |
