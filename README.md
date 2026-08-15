@@ -37,7 +37,14 @@ WebSocket
 
 ## 当前状态
 
-第一阶段 UI 骨架已提交。GitHub Actions 会执行前端构建和 Docker 镜像运行检查。
+已接入商城后端登录态与真实玩家快照：登录后根据绑定的 `game_uid` 显示昵称、UID、原石、摩拉和分页背包数据。挂单、订单与交易统计接口仍待后续接入，未接入的数字在页面中显示为 `—`。
+
+前端请求统一以 `/api/v1` 为基础路径：
+
+- `GET /auth/me`：恢复商城登录用户
+- `GET /player/me?page=1&page_size=100`：读取当前用户绑定的玩家快照
+
+GitHub Actions 会执行前端构建和 Docker 镜像运行检查。
 
 ## 本地开发
 
@@ -48,7 +55,9 @@ npm run dev
 
 默认前端地址：`http://localhost:5173`
 
-默认代理后端：`http://localhost:8080`
+默认代理后端：`http://localhost:8081`
+
+如需覆盖 API 基础路径，可复制 `.env.example` 并设置 `VITE_API_BASE_URL`。
 
 ## Docker 启动
 

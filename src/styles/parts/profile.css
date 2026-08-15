@@ -55,6 +55,7 @@
   font-weight: 700;
 }
 .profile-account-name span svg { width: 13px; height: 13px; }
+.profile-account-name span.error { background: rgba(255,208,208,.16); color: #ffd4d4; }
 .profile-account-copy p { margin: 7px 0 0; color: rgba(255,255,255,.72); font-size: 12.5px; }
 .profile-account-action {
   display: inline-flex;

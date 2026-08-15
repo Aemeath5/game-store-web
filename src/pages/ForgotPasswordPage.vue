@@ -56,7 +56,7 @@ async function sendCode() {
 
   sendingCode.value = true
   try {
-    const response = await api.post<ApiEnvelope<CodeResult>>('/v1/auth/password/reset/email-code', {
+    const response = await api.post<ApiEnvelope<CodeResult>>('/auth/password/reset/email-code', {
       email: email.value.trim(),
     })
     startCountdown(response.data.data.resend_after)
@@ -88,7 +88,7 @@ async function submit() {
 
   submitting.value = true
   try {
-    const response = await api.post<ApiEnvelope<ResetResult>>('/v1/auth/password/reset', {
+    const response = await api.post<ApiEnvelope<ResetResult>>('/auth/password/reset', {
       email: email.value.trim(),
       code: code.value.trim(),
       new_password: password.value,

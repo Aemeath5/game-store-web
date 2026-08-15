@@ -57,7 +57,7 @@ async function sendCode() {
 
   sendingCode.value = true
   try {
-    const response = await api.post<ApiEnvelope<CodeResult>>('/v1/auth/register/email-code', {
+    const response = await api.post<ApiEnvelope<CodeResult>>('/auth/register/email-code', {
       email: email.value.trim(),
     })
     startCountdown(response.data.data.resend_after)
@@ -89,7 +89,7 @@ async function submit() {
 
   submitting.value = true
   try {
-    const response = await api.post<ApiEnvelope<RegisterResult>>('/v1/auth/register', {
+    const response = await api.post<ApiEnvelope<RegisterResult>>('/auth/register', {
       username: username.value.trim(),
       email: email.value.trim(),
       email_code: code.value.trim(),

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import {
   Bell,
   Boxes,
@@ -19,20 +20,32 @@ import { useAppStore } from '@/stores/app'
 
 const app = useAppStore()
 const router = useRouter()
+const numberFormatter = new Intl.NumberFormat('zh-CN')
 
-const transactionLinks = [
-  { label: '我的挂单', desc: '查看正在出售的游戏道具', path: '/listings', icon: Tag, count: '40' },
-  { label: '购买记录', desc: '查看已经购买的游戏道具', path: '/orders', icon: ShoppingBag, count: '12' },
-  { label: '成交记录', desc: '查看自动交易完成记录', path: '/orders', icon: PackageCheck, count: '18' },
-  { label: '背包管理', desc: '查看可交易的游戏道具', path: '/listings', icon: Boxes, count: '157' },
-]
+const playerStatus = computed(() => {
+  if (app.playerLoading)
+    return '正在读取玩家数据'
+  if (app.playerError)
+    return '玩家数据读取失败'
+  if (app.playerSnapshot)
+    return '玩家数据已同步'
+  return '等待玩家数据'
+})
+const playerUid = computed(() => app.playerUid ? `UID ${app.playerUid}` : '等待关联')
+const inventoryCount = computed(() => app.inventoryTotal == null ? '—' : numberFormatter.format(app.inventoryTotal))
+const transactionLinks = computed(() => [
+  { label: '我的挂单', desc: '查看正在出售的游戏道具', path: '/listings', icon: Tag, count: '—' },
+  { label: '购买记录', desc: '查看已经购买的游戏道具', path: '/orders', icon: ShoppingBag, count: '—' },
+  { label: '成交记录', desc: '查看自动交易完成记录', path: '/orders', icon: PackageCheck, count: '—' },
+  { label: '背包管理', desc: '查看游戏存档中的背包道具', path: '/listings', icon: Boxes, count: inventoryCount.value },
+])
 
-const accountLinks = [
-  { label: '游戏账号', desc: '商城身份与游戏 UID', icon: Gamepad2, value: app.currentUser?.game_uid ? `UID ${app.currentUser.game_uid}` : '已连接' },
+const accountLinks = computed(() => [
+  { label: '游戏账号', desc: '商城身份与游戏 UID', icon: Gamepad2, value: playerUid.value },
   { label: '账户安全', desc: '登录密码与账号安全', icon: LockKeyhole, value: '安全' },
-  { label: '交易记录', desc: '查看全部挂单与购买流水', icon: History, value: '' },
+  { label: '玩家存档', desc: '商城后端读取的游戏数据版本', icon: History, value: app.playerSnapshot ? `版本 ${app.playerSnapshot.data_version}` : '未读取' },
   { label: '通知设置', desc: '交易完成与系统通知', icon: Bell, value: '' },
-]
+])
 
 function logout() {
   app.logout()
@@ -47,14 +60,14 @@ function logout() {
         <header class="profile-account-head">
           <div class="profile-account-main">
             <span class="profile-account-avatar">
-              <img src="/assets/reference/avatar-main.svg" alt="Aemeath" />
+              <img src="/assets/reference/avatar-main.svg" :alt="app.displayName" />
             </span>
             <div class="profile-account-copy">
               <div class="profile-account-name">
                 <h1>{{ app.displayName }}</h1>
-                <span><CheckCircle2 /> 游戏账号已连接</span>
+                <span :class="{ error: app.playerError }"><CheckCircle2 /> {{ playerStatus }}</span>
               </div>
-              <p v-if="app.currentUser?.game_uid">UID {{ app.currentUser.game_uid }}</p>
+              <p v-if="app.playerUid">UID {{ app.playerUid }}</p>
               <p v-else>登录后自动关联游戏角色 UID</p>
             </div>
           </div>
@@ -63,10 +76,10 @@ function logout() {
 
         <div class="profile-account-body">
           <div class="profile-stats-v2">
-            <RouterLink to="/listings"><strong>40</strong><span>我的挂单</span></RouterLink>
-            <RouterLink to="/orders"><strong>12</strong><span>购买记录</span></RouterLink>
-            <RouterLink to="/orders"><strong>18</strong><span>已完成交易</span></RouterLink>
-            <RouterLink to="/listings"><strong>157</strong><span>背包道具</span></RouterLink>
+            <RouterLink to="/listings"><strong>—</strong><span>我的挂单</span></RouterLink>
+            <RouterLink to="/orders"><strong>—</strong><span>购买记录</span></RouterLink>
+            <RouterLink to="/orders"><strong>—</strong><span>已完成交易</span></RouterLink>
+            <RouterLink to="/listings"><strong>{{ inventoryCount }}</strong><span>背包道具</span></RouterLink>
           </div>
         </div>
       </section>
