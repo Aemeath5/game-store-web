@@ -21,6 +21,7 @@
 .inventory-card > img { width: 92px; height: 92px; object-fit: contain; margin: 23px auto 5px; filter: drop-shadow(0 8px 10px rgba(56,78,112,.15)); }
 .inventory-card.is-locked > img { filter: grayscale(.45) drop-shadow(0 8px 10px rgba(56,78,112,.10)); opacity: .74; }
 .inventory-card h3 { margin: 4px 0 5px; color: #1f2e46; font-size: 13px; }
+.inventory-card__asset-id { margin: -2px 0 5px; color: #a0adbc; font-size: 9px; font-variant-numeric: tabular-nums; }
 .inventory-card__meta { min-height: 17px; margin: 0 0 4px; color: #748399; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .inventory-card__identity { display: block; margin-bottom: 11px; color: #9aa7b8; font-size: 8.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .inventory-card__footer { display: flex; align-items: center; justify-content: space-between; gap: 6px; border-top: 1px solid #edf2f8; padding-top: 10px; }

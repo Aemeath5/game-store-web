@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 import {
   Boxes,
   ChevronLeft,
@@ -12,6 +12,7 @@ import {
   UploadCloud,
 } from 'lucide-vue-next'
 import { useAppStore } from '@/stores/app'
+import { loadGameAssetIndex, type GameAssetItem } from '@/lib/gameAssets'
 import type { PlayerInventoryItem } from '@/types/player'
 
 const app = useAppStore()
@@ -20,6 +21,8 @@ const keyword = ref('')
 const categoryFilter = ref('all')
 const selectedItemKey = ref('')
 const numberFormatter = new Intl.NumberFormat('zh-CN')
+const gameAssets = shallowRef<Record<string, GameAssetItem>>({})
+const gameAssetVersion = ref('')
 
 const categoryPresentation: Record<string, { label: string, image: string }> = {
   material: { label: '材料', image: '/assets/reference/item-orb.svg' },
@@ -46,7 +49,7 @@ const filteredItems = computed(() => {
       return false
     if (!needle)
       return true
-    return [item.item_id, item.guid, item.item_key, item.category, categoryLabel(item.category)]
+    return [item.item_id, item.guid, item.item_key, item.category, categoryLabel(item.category), itemAsset(item)?.name]
       .filter(value => value != null)
       .some(value => String(value).toLowerCase().includes(needle))
   })
@@ -57,6 +60,17 @@ watch(inventoryItems, (items) => {
   if (!items.some(item => item.item_key === selectedItemKey.value && !item.locked))
     selectedItemKey.value = items.find(item => !item.locked)?.item_key ?? ''
 }, { immediate: true })
+
+onMounted(async () => {
+  try {
+    const index = await loadGameAssetIndex()
+    gameAssets.value = index.items
+    gameAssetVersion.value = index.game_version
+  }
+  catch {
+    // Cards keep their category fallback image if the optional atlas is unavailable.
+  }
+})
 
 function categoryMeta(category: string) {
   return categoryPresentation[category] ?? categoryPresentation.unknown
@@ -70,8 +84,23 @@ function categoryImage(category: string) {
   return categoryMeta(category).image
 }
 
+function itemAsset(item: PlayerInventoryItem) {
+  return gameAssets.value[String(item.item_id)]
+}
+
+function itemImage(item: PlayerInventoryItem) {
+  return itemAsset(item)?.icon || categoryImage(item.category)
+}
+
 function itemTitle(item: PlayerInventoryItem) {
-  return `${categoryLabel(item.category)} #${item.item_id}`
+  return itemAsset(item)?.name || `${categoryLabel(item.category)} #${item.item_id}`
+}
+
+function handleImageError(event: Event, item: PlayerInventoryItem) {
+  const image = event.currentTarget as HTMLImageElement
+  const fallback = categoryImage(item.category)
+  if (!image.src.endsWith(fallback))
+    image.src = fallback
 }
 
 function itemDetails(item: PlayerInventoryItem) {
@@ -148,7 +177,7 @@ function openPublish(item?: PlayerInventoryItem) {
         <div class="inventory-toolbar panel-light">
           <label class="light-search">
             <Search />
-            <input v-model="keyword" placeholder="在当前页搜索物品 ID、GUID 或分类...">
+            <input v-model="keyword" placeholder="在当前页搜索物品名、ID、GUID 或分类...">
           </label>
           <select v-model="categoryFilter" class="light-select inventory-category-select" aria-label="背包分类">
             <option value="all">全部分类</option>
@@ -173,14 +202,16 @@ function openPublish(item?: PlayerInventoryItem) {
           <div class="inventory-summary">
             <span>共 {{ formatAmount(inventory.total) }} 件记录，第 {{ inventory.page }} / {{ pageCount }} 页</span>
             <span v-if="app.playerLoading"><RefreshCw class="spinning" /> 正在更新…</span>
+            <span v-else-if="gameAssetVersion">图鉴 {{ gameAssetVersion }}</span>
           </div>
 
           <div v-if="filteredItems.length" class="inventory-grid">
             <article v-for="item in filteredItems" :key="item.item_key" class="inventory-card panel-light" :class="{ 'is-locked': item.locked }">
               <span class="inventory-category-badge">{{ categoryLabel(item.category) }}</span>
               <span v-if="item.locked" class="inventory-lock"><LockKeyhole /> 已锁定</span>
-              <img :src="categoryImage(item.category)" :alt="itemTitle(item)">
+              <img :src="itemImage(item)" :alt="itemTitle(item)" loading="lazy" @error="handleImageError($event, item)">
               <h3>{{ itemTitle(item) }}</h3>
+              <p v-if="itemAsset(item)" class="inventory-card__asset-id">ID {{ item.item_id }}</p>
               <p class="inventory-card__meta">{{ itemDetails(item) }}</p>
               <small class="inventory-card__identity" :title="itemIdentity(item)">{{ itemIdentity(item) }}</small>
               <div class="inventory-card__footer">
@@ -227,7 +258,7 @@ function openPublish(item?: PlayerInventoryItem) {
           <button class="primary-button" type="submit" disabled>挂单接口待接入</button>
         </form>
         <aside class="panel-light publish-help">
-          <img v-if="selectedItem" :src="categoryImage(selectedItem.category)" :alt="itemTitle(selectedItem)">
+          <img v-if="selectedItem" :src="itemImage(selectedItem)" :alt="itemTitle(selectedItem)" @error="handleImageError($event, selectedItem)">
           <UploadCloud v-else />
           <h3>{{ selectedItem ? itemTitle(selectedItem) : '从背包选择道具' }}</h3>
           <p v-if="selectedItem">数量 {{ formatAmount(selectedItem.count) }} · {{ itemDetails(selectedItem) }}</p>

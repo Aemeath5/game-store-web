@@ -6,6 +6,9 @@ COPY package*.json ./
 RUN npm install --no-audit --no-fund
 
 COPY . .
+RUN cat public/game-assets/icons.tar.gz.part-* \
+    | tar -xzf - -C public/game-assets \
+    && rm public/game-assets/icons.tar.gz.part-*
 RUN npm run build
 
 FROM nginx:alpine AS runtime
