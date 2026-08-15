@@ -33,6 +33,15 @@
 .wallet-mini__item:hover { background: rgba(238,246,255,.8); }
 .wallet-mini__num { font-size: 18px; font-weight: 800; color: #14213b; }
 .wallet-mini__label { font-size: 12px; color: #8493a8; }
+.wallet-snapshot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; color: #7890ad; font-size: 10.5px; }
+.wallet-snapshot > span { min-width: 0; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wallet-snapshot i { flex: 0 0 6px; width: 6px; height: 6px; border-radius: 50%; background: #39a971; box-shadow: 0 0 0 3px rgba(57,169,113,.10); }
+.wallet-snapshot.error { color: #bd5b5b; }
+.wallet-snapshot.error i { background: #dc5b5b; box-shadow: 0 0 0 3px rgba(220,91,91,.10); }
+.wallet-snapshot button { flex: 0 0 26px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: #f1f6fd; color: #6480a4; cursor: pointer; }
+.wallet-snapshot button:hover:not(:disabled) { color: #246cf0; background: #e8f2ff; }
+.wallet-snapshot button:disabled { cursor: wait; opacity: .6; }
+.wallet-snapshot button svg { width: 13px; height: 13px; }
 .quick-grid { flex: 1; display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
 .quick-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; padding: 12px 6px; border-radius: 12px; color: #46587a; text-decoration: none; transition: .2s ease; }
 .quick-cell:hover { color: #2369e8; background: rgba(255,255,255,.6); }

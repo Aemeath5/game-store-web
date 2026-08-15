@@ -53,7 +53,7 @@ const active = (path: string) => (path === '/' ? route.path === '/' : route.path
     <button class="nav-icon-btn" aria-label="购物车"><ShoppingCart /></button>
     <button class="nav-icon-btn nav-online" aria-label="连接状态"><CircleHelp /></button>
     <RouterLink to="/profile" class="nav-user-trigger">
-      <img src="/assets/reference/avatar-main.svg" alt="Aemeath" />
+      <img src="/assets/reference/avatar-main.svg" :alt="app.displayName" />
       <span>{{ app.displayName }}</span>
     </RouterLink>
   </header>
@@ -65,7 +65,7 @@ const active = (path: string) => (path === '/' ? route.path === '/' : route.path
       <button aria-label="通知"><Bell /></button>
       <button aria-label="消息"><MessageCircle /><i class="mobile-badge">3</i></button>
       <RouterLink to="/profile" class="mobile-avatar">
-        <img src="/assets/reference/avatar-main.svg" alt="Aemeath" />
+        <img src="/assets/reference/avatar-main.svg" :alt="app.displayName" />
       </RouterLink>
     </div>
   </header>

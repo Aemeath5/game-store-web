@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import {
   Archive,
   ArrowRight,
@@ -7,6 +8,7 @@ import {
   Hammer,
   Megaphone,
   ReceiptText,
+  RefreshCw,
   ShoppingBasket,
   ShoppingCart,
   Sparkles,
@@ -20,6 +22,33 @@ import {
 import { useAppStore } from '@/stores/app'
 
 const app = useAppStore()
+
+const numberFormatter = new Intl.NumberFormat('zh-CN')
+const primogem = computed(() => app.playerSnapshot?.currency.primogem)
+const mora = computed(() => app.playerSnapshot?.currency.mora)
+const inventoryTotal = computed(() => app.inventoryTotal)
+const playerStatus = computed(() => {
+  if (app.playerLoading)
+    return '正在读取游戏存档…'
+  if (app.playerError)
+    return app.playerError
+  if (app.playerSnapshot)
+    return `游戏数据已同步 · UID ${app.playerSnapshot.uid}`
+  return '等待读取游戏存档'
+})
+
+function formatAmount(value: number | null | undefined) {
+  return value == null ? '—' : numberFormatter.format(value)
+}
+
+async function refreshPlayer() {
+  try {
+    await app.loadPlayerSnapshot(1, 100, true)
+  }
+  catch {
+    // The store exposes the backend error beside the refresh button.
+  }
+}
 
 const quickLinks = [
   { label: '浏览市场', path: '/market', icon: ShoppingBasket },
@@ -71,7 +100,7 @@ const activities = [
                 <div class="wallet-balance">
                   <img src="/assets/reference/primogem.svg" alt="原石" class="wallet-balance__icon" />
                   <div class="wallet-balance__text">
-                    <strong class="wallet-balance__num">775,650</strong>
+                    <strong class="wallet-balance__num">{{ formatAmount(primogem) }}</strong>
                     <span class="wallet-balance__label">原石</span>
                   </div>
                 </div>
@@ -79,7 +108,7 @@ const activities = [
                 <div class="wallet-balance">
                   <img src="/assets/reference/mora.svg" alt="摩拉" class="wallet-balance__icon" />
                   <div class="wallet-balance__text">
-                    <strong class="wallet-balance__num">703,151</strong>
+                    <strong class="wallet-balance__num">{{ formatAmount(mora) }}</strong>
                     <span class="wallet-balance__label">摩拉</span>
                   </div>
                 </div>
@@ -88,21 +117,28 @@ const activities = [
               <div class="wallet-voucher">
                 <span class="voucher-ticket">🎟️</span>
                 <div class="wallet-voucher__text">
-                  <strong class="wallet-voucher__num">26</strong>
-                  <span class="wallet-voucher__label">摩石凭证</span>
+                  <strong class="wallet-voucher__num">—</strong>
+                  <span class="wallet-voucher__label">商城凭证</span>
                 </div>
-                <span class="wallet-voucher__expire">26 将于 12 小时后过期</span>
+                <span class="wallet-voucher__expire">功能尚未接入</span>
               </div>
 
               <div class="wallet-mini">
                 <RouterLink to="/listings" class="wallet-mini__item">
-                  <strong class="wallet-mini__num">40</strong>
+                  <strong class="wallet-mini__num">—</strong>
                   <span class="wallet-mini__label">我的挂单</span>
                 </RouterLink>
                 <RouterLink to="/listings" class="wallet-mini__item">
-                  <strong class="wallet-mini__num">157</strong>
+                  <strong class="wallet-mini__num">{{ formatAmount(inventoryTotal) }}</strong>
                   <span class="wallet-mini__label">背包道具</span>
                 </RouterLink>
+              </div>
+
+              <div class="wallet-snapshot" :class="{ error: app.playerError }" :title="playerStatus">
+                <span><i />{{ playerStatus }}</span>
+                <button type="button" :disabled="app.playerLoading" aria-label="刷新玩家数据" @click="refreshPlayer">
+                  <RefreshCw :class="{ spinning: app.playerLoading }" />
+                </button>
               </div>
             </div>
           </section>
@@ -187,4 +223,3 @@ const activities = [
     </div>
   </div>
 </template>
-

@@ -33,7 +33,7 @@ async function login() {
 
   loading.value = true
   try {
-    const response = await api.post<ApiEnvelope<LoginResult>>('/v1/auth/sdk/login', {
+    const response = await api.post<ApiEnvelope<LoginResult>>('/auth/sdk/login', {
       account: account.value.trim(),
       password: password.value,
     })

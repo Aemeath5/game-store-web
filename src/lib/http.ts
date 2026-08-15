@@ -2,7 +2,7 @@ import axios from 'axios'
 import { getAccessToken } from '@/lib/auth'
 
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL: (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/+$/, ''),
   timeout: 15_000,
   withCredentials: true,
   headers: {
