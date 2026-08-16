@@ -9,6 +9,7 @@ on:
       - "nginx.conf"
       - "compose.yaml"
       - "package.json"
+      - "scripts/**"
       - "src/**"
       - "public/**"
       - ".github/workflows/docker-build.yml"

@@ -25,6 +25,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Extract and validate game icons
+        run: |
+          cat public/game-assets/icons.tar.gz.part-* | tar -xzf - -C public/game-assets
+          rm public/game-assets/icons.tar.gz.part-*
+          npm run validate:game-assets
+
       - name: Type-check and build
         run: npm run build
 
