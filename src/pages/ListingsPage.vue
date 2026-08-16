@@ -14,6 +14,11 @@ import {
 import type { ApiEnvelope } from '@/lib/auth'
 import { apiErrorMessage } from '@/lib/auth'
 import { api } from '@/lib/http'
+import {
+  inventoryCategoryMeta,
+  inventoryDisplayCategory,
+  type InventoryDisplayCategory,
+} from '@/lib/inventoryCategories'
 import { useAppStore } from '@/stores/app'
 import { loadGameAssetIndex, type GameAssetItem } from '@/lib/gameAssets'
 import type { PlayerInventoryItem, PlayerSnapshot } from '@/types/player'
@@ -21,7 +26,7 @@ import type { PlayerInventoryItem, PlayerSnapshot } from '@/types/player'
 const app = useAppStore()
 const tab = ref<'inventory' | 'listing' | 'publish'>('inventory')
 const keyword = ref('')
-const categoryFilter = ref('all')
+const categoryFilter = ref<'all' | InventoryDisplayCategory>('all')
 const selectedItemKey = ref('')
 const numberFormatter = new Intl.NumberFormat('zh-CN')
 const gameAssets = shallowRef<Record<string, GameAssetItem>>({})
@@ -36,19 +41,12 @@ const wholeInventoryConcurrency = 2
 let wholeInventoryRequestId = 0
 let wholeInventoryInFlight = false
 
-const categoryPresentation: Record<string, { label: string, image: string }> = {
-  material: { label: '材料', image: '/assets/reference/item-orb.svg' },
-  furniture: { label: '摆设', image: '/assets/reference/item-blue.svg' },
-  equip: { label: '装备', image: '/assets/reference/item-snow.svg' },
-  weapon: { label: '武器', image: '/assets/reference/item-flower.svg' },
-  reliquary: { label: '圣遗物', image: '/assets/reference/item-mask.svg' },
-  unknown: { label: '其他道具', image: '/assets/reference/item-dragon.svg' },
-}
-
 const inventory = computed(() => app.playerSnapshot?.inventory ?? null)
 const inventoryItems = computed(() => inventory.value?.items ?? [])
 const currentPage = computed(() => inventory.value?.page ?? 1)
 const searchActive = computed(() => Boolean(keyword.value.trim()))
+const categoryActive = computed(() => categoryFilter.value !== 'all')
+const filterActive = computed(() => searchActive.value || categoryActive.value)
 const wholeInventoryFresh = computed(() => {
   const snapshot = app.playerSnapshot
   return wholeInventoryVersion.value != null
@@ -56,7 +54,10 @@ const wholeInventoryFresh = computed(() => {
     && wholeInventoryTotal.value === snapshot?.inventory.total
     && wholeInventoryItems.value.length === snapshot.inventory.total
 })
-const filterSourceItems = computed(() => searchActive.value && wholeInventoryFresh.value
+const completeInventoryItems = computed(() => wholeInventoryFresh.value
+  ? wholeInventoryItems.value
+  : inventoryItems.value)
+const filterSourceItems = computed(() => filterActive.value && wholeInventoryFresh.value
   ? wholeInventoryItems.value
   : inventoryItems.value)
 const pageCount = computed(() => {
@@ -64,28 +65,50 @@ const pageCount = computed(() => {
     return 1
   return Math.max(1, Math.ceil(inventory.value.total / inventory.value.page_size))
 })
-const categoryOptions = computed(() => [...new Set(filterSourceItems.value.map(item => item.category))].sort())
+const categoryOptions = computed(() => {
+  const counts = new Map<InventoryDisplayCategory, number>()
+
+  for (const item of completeInventoryItems.value) {
+    const category = itemDisplayCategory(item)
+    counts.set(category, (counts.get(category) ?? 0) + 1)
+  }
+
+  return [...counts.entries()]
+    .sort(([left], [right]) => inventoryCategoryMeta(left).order - inventoryCategoryMeta(right).order)
+    .map(([value, count]) => ({ value, count, label: categoryLabel(value) }))
+})
 const filteredItems = computed(() => {
   const needle = keyword.value.trim().toLowerCase()
   return filterSourceItems.value.filter((item) => {
-    if (categoryFilter.value !== 'all' && item.category !== categoryFilter.value)
+    const displayCategory = itemDisplayCategory(item)
+    if (categoryFilter.value !== 'all' && displayCategory !== categoryFilter.value)
       return false
     if (!needle)
       return true
-    return [item.item_id, item.guid, item.item_key, item.category, categoryLabel(item.category), itemAsset(item)?.name]
+    const asset = itemAsset(item)
+    return [
+      item.item_id,
+      item.guid,
+      item.item_key,
+      item.category,
+      categoryLabel(displayCategory),
+      asset?.kind,
+      asset?.type,
+      asset?.name,
+    ]
       .filter(value => value != null)
       .some(value => String(value).toLowerCase().includes(needle))
   })
 })
-const selectedItem = computed(() => inventoryItems.value.find(item => item.item_key === selectedItemKey.value))
+const selectedItem = computed(() => completeInventoryItems.value.find(item => item.item_key === selectedItemKey.value))
 
-watch(inventoryItems, (items) => {
+watch(completeInventoryItems, (items) => {
   if (!items.some(item => item.item_key === selectedItemKey.value && !item.locked))
     selectedItemKey.value = items.find(item => !item.locked)?.item_key ?? ''
 }, { immediate: true })
 
-watch(keyword, () => {
-  if (searchActive.value && !wholeInventoryFresh.value && !wholeInventoryInFlight)
+watch(filterActive, (active) => {
+  if (active && !wholeInventoryFresh.value && !wholeInventoryInFlight)
     void loadWholeInventory()
 })
 
@@ -95,8 +118,7 @@ watch(
     if (version === previousVersion && total === previousTotal)
       return
     invalidateWholeInventory()
-    if (searchActive.value)
-      void loadWholeInventory()
+    void loadWholeInventory()
   },
 )
 
@@ -109,17 +131,20 @@ onMounted(async () => {
   catch {
     // Cards keep their category fallback image if the optional atlas is unavailable.
   }
+  finally {
+    void loadWholeInventory()
+  }
 })
 
-function categoryMeta(category: string) {
-  return categoryPresentation[category] ?? categoryPresentation.unknown
+function categoryMeta(category: InventoryDisplayCategory) {
+  return inventoryCategoryMeta(category)
 }
 
-function categoryLabel(category: string) {
+function categoryLabel(category: InventoryDisplayCategory) {
   return categoryMeta(category).label
 }
 
-function categoryImage(category: string) {
+function categoryImage(category: InventoryDisplayCategory) {
   return categoryMeta(category).image
 }
 
@@ -127,17 +152,21 @@ function itemAsset(item: PlayerInventoryItem) {
   return gameAssets.value[String(item.item_id)]
 }
 
+function itemDisplayCategory(item: PlayerInventoryItem) {
+  return inventoryDisplayCategory(item, itemAsset(item))
+}
+
 function itemImage(item: PlayerInventoryItem) {
-  return itemAsset(item)?.icon || categoryImage(item.category)
+  return itemAsset(item)?.icon || categoryImage(itemDisplayCategory(item))
 }
 
 function itemTitle(item: PlayerInventoryItem) {
-  return itemAsset(item)?.name || `${categoryLabel(item.category)} #${item.item_id}`
+  return itemAsset(item)?.name || `${categoryLabel(itemDisplayCategory(item))} #${item.item_id}`
 }
 
 function handleImageError(event: Event, item: PlayerInventoryItem) {
   const image = event.currentTarget as HTMLImageElement
-  const fallback = categoryImage(item.category)
+  const fallback = categoryImage(itemDisplayCategory(item))
   if (!image.src.endsWith(fallback))
     image.src = fallback
 }
@@ -235,8 +264,7 @@ async function refreshInventory() {
   invalidateWholeInventory()
   try {
     await app.loadPlayerSnapshot(currentPage.value, inventory.value?.page_size ?? 100, true)
-    if (searchActive.value)
-      void loadWholeInventory()
+    void loadWholeInventory()
   }
   catch {
     // The store exposes the backend error in this page.
@@ -291,7 +319,9 @@ function openPublish(item?: PlayerInventoryItem) {
           </label>
           <select v-model="categoryFilter" class="light-select inventory-category-select" aria-label="背包分类">
             <option value="all">全部分类</option>
-            <option v-for="category in categoryOptions" :key="category" :value="category">{{ categoryLabel(category) }}</option>
+            <option v-for="category in categoryOptions" :key="category.value" :value="category.value">
+              {{ category.label }}（{{ formatAmount(category.count) }}）
+            </option>
           </select>
           <button class="inventory-refresh" type="button" :disabled="app.playerLoading" @click="refreshInventory">
             <RefreshCw :class="{ spinning: app.playerLoading }" /> 刷新
@@ -310,23 +340,23 @@ function openPublish(item?: PlayerInventoryItem) {
         </div>
         <template v-else>
           <div class="inventory-summary">
-            <span v-if="searchActive && wholeInventoryFresh">已搜索全部 {{ formatAmount(inventory.total) }} 件记录，找到 {{ formatAmount(filteredItems.length) }} 件</span>
+            <span v-if="filterActive && wholeInventoryFresh">已筛选全部 {{ formatAmount(inventory.total) }} 件记录，找到 {{ formatAmount(filteredItems.length) }} 件</span>
             <span v-else>共 {{ formatAmount(inventory.total) }} 件记录，第 {{ inventory.page }} / {{ pageCount }} 页</span>
-            <span v-if="searchActive && wholeInventoryLoading"><RefreshCw class="spinning" /> 正在搜索整个背包…</span>
+            <span v-if="wholeInventoryLoading"><RefreshCw class="spinning" /> 正在整理全背包分类…</span>
             <span v-else-if="app.playerLoading"><RefreshCw class="spinning" /> 正在更新…</span>
             <span v-else-if="gameAssetVersion">图鉴 {{ gameAssetVersion }}</span>
           </div>
 
-          <div v-if="searchActive && wholeInventoryLoading" class="inventory-state panel-light">
-            <RefreshCw class="spinning" /><div><strong>正在搜索整个背包</strong><p>首次搜索会加载所有背包分页。</p></div>
+          <div v-if="filterActive && wholeInventoryLoading" class="inventory-state panel-light">
+            <RefreshCw class="spinning" /><div><strong>正在加载完整分类</strong><p>分类和搜索会检查所有背包分页。</p></div>
           </div>
-          <div v-else-if="searchActive && wholeInventoryError" class="inventory-state inventory-state--error panel-light">
-            <div><strong>全背包搜索失败</strong><p>{{ wholeInventoryError }}</p></div>
+          <div v-else-if="filterActive && wholeInventoryError" class="inventory-state inventory-state--error panel-light">
+            <div><strong>全背包筛选失败</strong><p>{{ wholeInventoryError }}</p></div>
             <button type="button" @click="loadWholeInventory">重试</button>
           </div>
           <div v-else-if="filteredItems.length" class="inventory-grid">
             <article v-for="item in filteredItems" :key="item.item_key" class="inventory-card panel-light" :class="{ 'is-locked': item.locked }">
-              <span class="inventory-category-badge">{{ categoryLabel(item.category) }}</span>
+              <span class="inventory-category-badge">{{ categoryLabel(itemDisplayCategory(item)) }}</span>
               <span v-if="item.locked" class="inventory-lock"><LockKeyhole /> 已锁定</span>
               <img :src="itemImage(item)" :alt="itemTitle(item)" loading="lazy" @error="handleImageError($event, item)">
               <h3>{{ itemTitle(item) }}</h3>
@@ -340,10 +370,10 @@ function openPublish(item?: PlayerInventoryItem) {
             </article>
           </div>
           <div v-else class="inventory-state panel-light">
-            <Search /><div><strong>{{ searchActive ? '整个背包没有匹配道具' : '当前页没有匹配道具' }}</strong><p>请清除搜索内容或切换分类。</p></div>
+            <Search /><div><strong>{{ filterActive ? '整个背包没有匹配道具' : '当前页没有匹配道具' }}</strong><p>请清除搜索内容或切换分类。</p></div>
           </div>
 
-          <nav v-if="pageCount > 1 && !searchActive" class="inventory-pagination" aria-label="背包分页">
+          <nav v-if="pageCount > 1 && !filterActive" class="inventory-pagination" aria-label="背包分页">
             <button type="button" :disabled="currentPage <= 1 || app.playerLoading" @click="changePage(currentPage - 1)"><ChevronLeft /> 上一页</button>
             <span>{{ currentPage }} / {{ pageCount }}</span>
             <button type="button" :disabled="currentPage >= pageCount || app.playerLoading" @click="changePage(currentPage + 1)">下一页 <ChevronRight /></button>
@@ -362,9 +392,9 @@ function openPublish(item?: PlayerInventoryItem) {
           <p class="publish-form__notice">当前只完成真实背包读取，提交挂单将在交易接口接入后开放。</p>
           <label>
             选择道具
-            <select v-model="selectedItemKey" :disabled="!inventoryItems.length">
-              <option v-if="!inventoryItems.length" value="">当前页没有可选道具</option>
-              <option v-for="item in inventoryItems" :key="item.item_key" :value="item.item_key" :disabled="item.locked">
+            <select v-model="selectedItemKey" :disabled="!completeInventoryItems.length">
+              <option v-if="!completeInventoryItems.length" value="">背包没有可选道具</option>
+              <option v-for="item in completeInventoryItems" :key="item.item_key" :value="item.item_key" :disabled="item.locked">
                 {{ itemTitle(item) }} · 数量 {{ formatAmount(item.count) }}{{ item.locked ? '（已锁定）' : '' }}
               </option>
             </select>
