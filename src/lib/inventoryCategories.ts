@@ -8,7 +8,7 @@ export interface InventoryCategoryMeta {
 }
 
 export const inventoryCategoryPresentation = {
-  currency: { label: '货币资源', image: '/assets/reference/primogem.svg', order: 10 },
+  currency: { label: '货币资源', image: '/game-assets/icons/UI_ItemIcon_201.webp', order: 10 },
   'weapon-sword': { label: '单手剑', image: '/assets/reference/item-flower.svg', order: 20 },
   'weapon-claymore': { label: '双手剑', image: '/assets/reference/item-flower.svg', order: 21 },
   'weapon-pole': { label: '长柄武器', image: '/assets/reference/item-flower.svg', order: 22 },

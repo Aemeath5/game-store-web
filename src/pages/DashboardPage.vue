@@ -22,6 +22,8 @@ import {
 import { useAppStore } from '@/stores/app'
 
 const app = useAppStore()
+const primogemIcon = '/game-assets/icons/UI_ItemIcon_201.webp'
+const moraIcon = '/game-assets/icons/UI_ItemIcon_202.webp'
 
 const numberFormatter = new Intl.NumberFormat('zh-CN')
 const primogem = computed(() => app.playerSnapshot?.currency.primogem)
@@ -98,7 +100,7 @@ const activities = [
             <div class="wallet-card__body">
               <div class="wallet-balances">
                 <div class="wallet-balance">
-                  <img src="/assets/reference/primogem.svg" alt="原石" class="wallet-balance__icon" />
+                  <img :src="primogemIcon" alt="原石" class="wallet-balance__icon" />
                   <div class="wallet-balance__text">
                     <strong class="wallet-balance__num">{{ formatAmount(primogem) }}</strong>
                     <span class="wallet-balance__label">原石</span>
@@ -106,7 +108,7 @@ const activities = [
                 </div>
                 <span class="wallet-balances__divider" />
                 <div class="wallet-balance">
-                  <img src="/assets/reference/mora.svg" alt="摩拉" class="wallet-balance__icon" />
+                  <img :src="moraIcon" alt="摩拉" class="wallet-balance__icon" />
                   <div class="wallet-balance__text">
                     <strong class="wallet-balance__num">{{ formatAmount(mora) }}</strong>
                     <span class="wallet-balance__label">摩拉</span>
@@ -163,7 +165,7 @@ const activities = [
         </div>
         <div class="mstat">
           <div class="mstat__body"><strong class="mstat__num">677.2 万</strong><span class="mstat__label"><i class="mstat__dot dot-volume" />累计成交额</span></div>
-          <img src="/assets/reference/mora.svg" alt="" class="mstat__coin" />
+          <img :src="moraIcon" alt="" class="mstat__coin" />
         </div>
         <div class="mstat">
           <div class="mstat__body"><strong class="mstat__num">1,217</strong><span class="mstat__label"><i class="mstat__dot dot-total" />历史挂单</span></div>
