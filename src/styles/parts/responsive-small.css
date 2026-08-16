@@ -3,7 +3,7 @@
   .wallet-balance:nth-child(odd) { padding-right: 9px; }
   .wallet-balance:nth-child(even) { padding-left: 9px; }
   .wallet-balance__icon { width: 40px; height: 40px; }
-  .wallet-balance__num { font-size: 21px; }
+  .wallet-balance__num { font-size: 19px; }
   .market-card__image-wrap { height: 120px; }
   .market-card__tags span:nth-child(2) { display: none; }
   .profile-info p { max-width: 180px; }
