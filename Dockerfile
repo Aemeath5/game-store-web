@@ -8,7 +8,8 @@ RUN npm install --no-audit --no-fund
 COPY . .
 RUN cat public/game-assets/icons.tar.gz.part-* \
     | tar -xzf - -C public/game-assets \
-    && rm public/game-assets/icons.tar.gz.part-*
+    && rm public/game-assets/icons.tar.gz.part-* \
+    && npm run validate:game-assets
 RUN npm run build
 
 FROM nginx:alpine AS runtime

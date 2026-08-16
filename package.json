@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
+    "validate:game-assets": "node scripts/validate-game-assets.mjs public/game-assets/icons 256",
     "type-check": "vue-tsc --noEmit",
     "build": "npm run type-check && vite build",
     "preview": "vite preview --host 0.0.0.0"
