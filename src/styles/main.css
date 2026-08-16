@@ -3,6 +3,7 @@
 @import "./parts/base.css";
 @import "./parts/navigation.css";
 @import "./parts/shared.css";
+@import "./parts/app-select.css";
 @import "./parts/dashboard.css";
 @import "./parts/market.css";
 @import "./parts/detail.css";

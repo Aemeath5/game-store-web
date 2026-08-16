@@ -142,7 +142,7 @@
 .admin-card__header span { color: #8a97a9; font-size: 10px; font-weight: 800; letter-spacing: .08em; }
 .admin-card__header h2 { margin: 3px 0 0; font-size: 17px; }
 .admin-card__header a { color: #2f80ed; font-size: 12px; font-weight: 800; }
-.admin-card__header select { height: 34px; border: 1px solid #e1e8f2; border-radius: 10px; background: #f8fbff; padding: 0 10px; color: #65738a; }
+.admin-period-select { width: 118px; flex: 0 0 auto; }
 .admin-chart-summary { padding: 18px 20px 0; }
 .admin-chart-summary strong { display: block; font-size: 27px; }
 .admin-chart-summary span { color: #8c98aa; font-size: 11px; }
@@ -203,6 +203,7 @@
 .admin-tabs button.active { border-bottom-color: #2f80ed; color: #2f80ed; }
 .admin-toolbar-inline { display: flex; gap: 10px; padding: 14px 15px; }
 .admin-toolbar-inline .admin-field--search { flex: 1; }
+.admin-filter-select { width: 170px; flex: 0 0 auto; }
 .admin-role { display: inline-flex; align-items: center; gap: 5px; font-weight: 750; }
 .admin-role svg { width: 14px; color: #2e80ed; }
 
@@ -214,7 +215,7 @@
 .admin-setting-card header svg { width: 20px; color: #347fdd; }
 .admin-setting-card header small { margin-top: 5px; color: #8d99aa; font-size: 10px; }
 .admin-setting-card > label:not(.admin-switch-row), .admin-secret-grid label { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; color: #58687d; font-size: 11px; font-weight: 750; }
-.admin-setting-card input:not([type="checkbox"]), .admin-setting-card textarea, .admin-setting-card select { width: 100%; border: 1px solid #dfe7f1; border-radius: 11px; background: #f9fbfe; padding: 11px 12px; color: #1d2a3f; outline: none; }
+.admin-setting-card input:not([type="checkbox"]), .admin-setting-card textarea { width: 100%; border: 1px solid #dfe7f1; border-radius: 11px; background: #f9fbfe; padding: 11px 12px; color: #1d2a3f; outline: none; }
 .admin-switch-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid #eef2f6; padding: 15px 0; }
 .admin-switch-row > span { display: flex; flex-direction: column; }
 .admin-switch-row b { font-size: 12px; }
@@ -264,6 +265,7 @@
   .admin-order-summary article > svg, .admin-user-summary article > svg { width: 31px; height: 31px; }
   .admin-order-summary strong, .admin-user-summary strong { font-size: 15px; }
   .admin-toolbar-inline { align-items: stretch; flex-direction: column; }
+  .admin-filter-select { width: 100%; }
   .admin-bar-chart { gap: 6px; }
   .admin-secret-grid { grid-template-columns: 1fr; }
 }

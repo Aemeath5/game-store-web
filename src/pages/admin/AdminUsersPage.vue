@@ -1,5 +1,15 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { Ban, BadgeCheck, Search, ShieldCheck, UserCheck, Users } from 'lucide-vue-next'
+import AppSelect from '@/components/ui/AppSelect.vue'
+
+const roleFilter = ref('all')
+const roleOptions = [
+  { value: 'all', label: '全部身份' },
+  { value: 'user', label: '普通用户' },
+  { value: 'seller', label: '认证卖家' },
+  { value: 'admin', label: '管理员' },
+]
 
 const users = [
   { name: 'Aemeath', email: 'aemeath@example.com', role: '超级管理员', level: 'Lv.12', trades: 58, balance: '¥ 6,820', status: '正常', avatar: '/assets/reference/avatar-main.svg' },
@@ -23,7 +33,7 @@ const users = [
     <section class="admin-card">
       <div class="admin-toolbar-inline">
         <label class="admin-field admin-field--search"><Search /><input placeholder="搜索用户名、邮箱或 UID" /></label>
-        <select class="admin-field"><option>全部身份</option><option>普通用户</option><option>认证卖家</option><option>管理员</option></select>
+        <AppSelect v-model="roleFilter" class="admin-filter-select" :options="roleOptions" aria-label="选择用户身份" variant="admin" />
       </div>
       <div class="admin-table-wrap">
         <table class="admin-table">

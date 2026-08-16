@@ -19,8 +19,7 @@
 .light-search > svg { position: absolute; left: 13px; color: #90a0b5; font-size: 17px; pointer-events: none; }
 .light-search input { width: 100%; height: 42px; padding: 0 14px 0 40px; border: 1px solid #dbe5f3; border-radius: 10px; outline: none; color: var(--text); background: #f8fbff; font-size: 13px; }
 .light-search input:focus { border-color: #71a7f8; box-shadow: 0 0 0 3px rgba(36,108,240,.08); background: #fff; }
-.light-select, .filter-button { height: 42px; display: inline-flex; align-items: center; gap: 7px; border: 1px solid #dbe5f3; border-radius: 10px; background: #fff; color: #64748b; padding: 0 13px; font-size: 12.5px; font-weight: 650; cursor: pointer; }
-.filter-button { color: #fff; background: #246cf0; border-color: #246cf0; }
+.filter-button { height: 42px; display: inline-flex; align-items: center; gap: 7px; border: 1px solid #246cf0; border-radius: 10px; background: #246cf0; color: #fff; padding: 0 13px; font-size: 12.5px; font-weight: 650; cursor: pointer; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinning { animation: spin .9s linear infinite; }

@@ -49,7 +49,8 @@
   .market-tabs button { height: 38px; }
   .market-search-row { grid-template-columns: 1fr auto; }
   .market-search-row .filter-button { display: none; }
-  .market-search-row .light-select { padding: 0 10px; }
+  .market-sort-select { width: 138px; }
+  .market-sort-select .app-select__trigger { padding: 0 10px; }
   .market-filter-chips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
   .market-filter-chips::-webkit-scrollbar { display: none; }
   .market-filter-chips button { flex-shrink: 0; }

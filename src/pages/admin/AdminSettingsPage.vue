@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { BellRing, CloudCog, Database, KeyRound, Megaphone, Save, ShieldCheck } from 'lucide-vue-next'
+import AppSelect from '@/components/ui/AppSelect.vue'
 
 const maintenance = ref(false)
 const manualReview = ref(true)
 const sellerAudit = ref(true)
+const disputeNotification = ref('instant')
+const disputeNotificationOptions = [
+  { value: 'instant', label: '立即通知' },
+  { value: 'digest', label: '每 10 分钟汇总' },
+]
 </script>
 
 <template>
@@ -40,7 +46,7 @@ const sellerAudit = ref(true)
       <article class="admin-card admin-setting-card">
         <header><span><BellRing /><b>通知设置</b></span><small>公告与管理员提醒</small></header>
         <label>管理员通知邮箱<input value="admin@aemeath.com" /></label>
-        <label>订单争议提醒<select><option>立即通知</option><option>每 10 分钟汇总</option></select></label>
+        <label>订单争议提醒<AppSelect v-model="disputeNotification" :options="disputeNotificationOptions" aria-label="选择订单争议提醒频率" variant="form" /></label>
         <button class="admin-secondary-button"><Megaphone /> 发布平台公告</button>
       </article>
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import {
   ArrowUpRight,
   BadgeCheck,
@@ -9,6 +10,14 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-vue-next'
+import AppSelect from '@/components/ui/AppSelect.vue'
+
+const trendPeriod = ref('today')
+const trendPeriodOptions = [
+  { value: 'today', label: '今日' },
+  { value: '7d', label: '近 7 天' },
+  { value: '30d', label: '近 30 天' },
+]
 
 const metrics = [
   { label: '在售商品', value: '172', change: '+12.8%', icon: PackageSearch, tone: 'blue' },
@@ -53,7 +62,14 @@ const trend = [42, 58, 49, 68, 62, 78, 72, 91, 84, 96, 88, 100]
       <article class="admin-card admin-trend-card">
         <header class="admin-card__header">
           <div><span>近 12 小时</span><h2>成交趋势</h2></div>
-          <select><option>今日</option><option>近 7 天</option><option>近 30 天</option></select>
+          <AppSelect
+            v-model="trendPeriod"
+            class="admin-period-select"
+            :options="trendPeriodOptions"
+            aria-label="选择成交趋势时间"
+            variant="admin"
+            size="compact"
+          />
         </header>
         <div class="admin-chart-summary"><strong>¥ 38,420</strong><span>今日累计成交额</span></div>
         <div class="admin-bar-chart">

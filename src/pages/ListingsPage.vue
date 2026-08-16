@@ -19,6 +19,7 @@ import {
   inventoryDisplayCategory,
   type InventoryDisplayCategory,
 } from '@/lib/inventoryCategories'
+import AppSelect from '@/components/ui/AppSelect.vue'
 import { useAppStore } from '@/stores/app'
 import { loadGameAssetIndex, type GameAssetItem } from '@/lib/gameAssets'
 import type { PlayerInventoryItem, PlayerSnapshot } from '@/types/player'
@@ -77,6 +78,18 @@ const categoryOptions = computed(() => {
     .sort(([left], [right]) => inventoryCategoryMeta(left).order - inventoryCategoryMeta(right).order)
     .map(([value, count]) => ({ value, count, label: categoryLabel(value) }))
 })
+const categorySelectOptions = computed(() => [
+  {
+    value: 'all',
+    label: '全部分类',
+    meta: wholeInventoryFresh.value ? `${formatAmount(inventory.value?.total)} 件` : undefined,
+  },
+  ...categoryOptions.value.map(category => ({
+    value: category.value,
+    label: category.label,
+    meta: `${formatAmount(category.count)} 件`,
+  })),
+])
 const filteredItems = computed(() => {
   const needle = keyword.value.trim().toLowerCase()
   return filterSourceItems.value.filter((item) => {
@@ -101,6 +114,13 @@ const filteredItems = computed(() => {
   })
 })
 const selectedItem = computed(() => completeInventoryItems.value.find(item => item.item_key === selectedItemKey.value))
+const publishItemOptions = computed(() => completeInventoryItems.value.map(item => ({
+  value: item.item_key,
+  label: itemTitle(item),
+  description: `ID ${item.item_id}${item.guid ? ` · GUID ${item.guid}` : ''}`,
+  meta: item.locked ? '已锁定' : `× ${formatAmount(item.count)}`,
+  disabled: item.locked,
+})))
 
 watch(completeInventoryItems, (items) => {
   if (!items.some(item => item.item_key === selectedItemKey.value && !item.locked))
@@ -317,12 +337,13 @@ function openPublish(item?: PlayerInventoryItem) {
             <Search />
             <input v-model="keyword" placeholder="搜索整个背包的物品名、ID、GUID 或分类...">
           </label>
-          <select v-model="categoryFilter" class="light-select inventory-category-select" aria-label="背包分类">
-            <option value="all">全部分类</option>
-            <option v-for="category in categoryOptions" :key="category.value" :value="category.value">
-              {{ category.label }}（{{ formatAmount(category.count) }}）
-            </option>
-          </select>
+          <AppSelect
+            v-model="categoryFilter"
+            class="inventory-category-select"
+            :options="categorySelectOptions"
+            aria-label="选择背包分类"
+            search-placeholder="搜索分类…"
+          />
           <button class="inventory-refresh" type="button" :disabled="app.playerLoading" @click="refreshInventory">
             <RefreshCw :class="{ spinning: app.playerLoading }" /> 刷新
           </button>
@@ -392,12 +413,16 @@ function openPublish(item?: PlayerInventoryItem) {
           <p class="publish-form__notice">当前只完成真实背包读取，提交挂单将在交易接口接入后开放。</p>
           <label>
             选择道具
-            <select v-model="selectedItemKey" :disabled="!completeInventoryItems.length">
-              <option v-if="!completeInventoryItems.length" value="">背包没有可选道具</option>
-              <option v-for="item in completeInventoryItems" :key="item.item_key" :value="item.item_key" :disabled="item.locked">
-                {{ itemTitle(item) }} · 数量 {{ formatAmount(item.count) }}{{ item.locked ? '（已锁定）' : '' }}
-              </option>
-            </select>
+            <AppSelect
+              v-model="selectedItemKey"
+              :options="publishItemOptions"
+              :disabled="!completeInventoryItems.length"
+              aria-label="选择上架道具"
+              placeholder="背包没有可选道具"
+              search-placeholder="搜索物品名、ID 或 GUID…"
+              searchable
+              variant="form"
+            />
           </label>
           <div class="two-fields">
             <label>数量<input type="number" value="1" min="1" :max="selectedItem?.count || 1"></label>

@@ -1,8 +1,23 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { CheckCircle2, Eye, Filter, MoreHorizontal, Plus, Search, XCircle } from 'lucide-vue-next'
+import AppSelect from '@/components/ui/AppSelect.vue'
 
 const keyword = ref('')
+const categoryFilter = ref('all')
+const statusFilter = ref('all')
+const categoryOptions = [
+  { value: 'all', label: '全部分类' },
+  { value: '材料', label: '材料' },
+  { value: '武器', label: '武器' },
+  { value: '角色', label: '角色' },
+]
+const statusOptions = [
+  { value: 'all', label: '全部状态' },
+  { value: '在售', label: '在售' },
+  { value: '审核中', label: '审核中' },
+  { value: '已下架', label: '已下架' },
+]
 const products = [
   { id: 10042, name: '冰之印 × 10', category: '材料', seller: '璃月百货', price: '¥ 680', stock: 18, status: '在售', image: '/assets/reference/item-orb.svg' },
   { id: 10041, name: '脆弱树脂 × 5', category: '材料', seller: '枫丹商会', price: '¥ 320', stock: 9, status: '在售', image: '/assets/reference/item-snow.svg' },
@@ -11,7 +26,11 @@ const products = [
   { id: 10038, name: '雷霆数珠 × 20', category: '材料', seller: '稻妻杂货铺', price: '¥ 475', stock: 26, status: '在售', image: '/assets/reference/item-mask.svg' },
 ]
 
-const filtered = computed(() => products.filter(item => `${item.name}${item.seller}${item.category}`.includes(keyword.value)))
+const filtered = computed(() => products.filter(item => (
+  `${item.name}${item.seller}${item.category}`.includes(keyword.value)
+  && (categoryFilter.value === 'all' || item.category === categoryFilter.value)
+  && (statusFilter.value === 'all' || item.status === statusFilter.value)
+)))
 </script>
 
 <template>
@@ -23,8 +42,8 @@ const filtered = computed(() => products.filter(item => `${item.name}${item.sell
 
     <section class="admin-card admin-toolbar-card">
       <label class="admin-field admin-field--search"><Search /><input v-model="keyword" placeholder="搜索商品、卖家或分类" /></label>
-      <select class="admin-field"><option>全部分类</option><option>材料</option><option>武器</option><option>角色</option></select>
-      <select class="admin-field"><option>全部状态</option><option>在售</option><option>审核中</option><option>已下架</option></select>
+      <AppSelect v-model="categoryFilter" :options="categoryOptions" aria-label="选择商品分类" variant="admin" />
+      <AppSelect v-model="statusFilter" :options="statusOptions" aria-label="选择商品状态" variant="admin" />
       <button class="admin-secondary-button"><Filter /> 更多筛选</button>
     </section>
 

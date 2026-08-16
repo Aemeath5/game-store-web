@@ -47,7 +47,7 @@
 .publish-form h2 { margin: 0 0 4px; font-size: 20px; }
 .publish-form__notice { margin: -5px 0 2px; padding: 9px 11px; border-radius: 9px; background: #fff8e9; color: #9a681a; font-size: 11px; line-height: 1.55; }
 .publish-form label { display: grid; gap: 7px; color: #687a91; font-size: 12px; font-weight: 650; }
-.publish-form input, .publish-form select, .publish-form textarea { width: 100%; min-height: 42px; padding: 0 12px; border: 1px solid #dfe8f5; border-radius: 9px; background: #f9fbfe; color: #1f2e46; outline: none; }
+.publish-form input, .publish-form textarea { width: 100%; min-height: 42px; padding: 0 12px; border: 1px solid #dfe8f5; border-radius: 9px; background: #f9fbfe; color: #1f2e46; outline: none; }
 .publish-form textarea { min-height: 120px; padding-top: 11px; resize: vertical; }
 .publish-form .primary-button:disabled { transform: none; filter: none; background: #aebdce; box-shadow: none; cursor: not-allowed; }
 .two-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

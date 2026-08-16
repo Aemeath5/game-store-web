@@ -5,6 +5,7 @@
 .market-tabs button { height: 42px; border: 1px solid #e1e9f5; border-radius: 10px; background: #f8fbff; color: #6f7f94; font-size: 13px; font-weight: 750; cursor: pointer; }
 .market-tabs button.active { color: #fff; border-color: #246cf0; background: linear-gradient(180deg,#3d8bff,#1c62df); box-shadow: 0 8px 18px rgba(34,105,236,.18); }
 .market-search-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; margin-top: 14px; }
+.market-sort-select { width: 154px; }
 .market-filter-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .market-filter-chips button { border: 1px solid #dfe8f5; border-radius: 999px; background: #fff; color: #73839a; padding: 6px 11px; font-size: 12px; cursor: pointer; }
 .market-filter-chips button.active { color: #246cf0; border-color: rgba(36,108,240,.35); background: rgba(36,108,240,.07); }

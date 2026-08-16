@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { ChevronDown, Filter, Search, SlidersHorizontal } from 'lucide-vue-next'
+import { Filter, Search, SlidersHorizontal } from 'lucide-vue-next'
+import AppSelect from '@/components/ui/AppSelect.vue'
 import GameCard from '@/components/ui/GameCard.vue'
 import { products } from '@/data/products'
 
@@ -8,6 +9,13 @@ const keyword = ref('')
 const currentTab = ref<'market' | 'auction' | 'wanted'>('market')
 const filters = ['全部类型', '角色材料', '武器', '圣遗物', '消耗品']
 const activeFilter = ref('全部类型')
+const sortOrder = ref('comprehensive')
+const sortOptions = [
+  { value: 'comprehensive', label: '综合排序' },
+  { value: 'newest', label: '最新发布' },
+  { value: 'price-low', label: '价格从低到高' },
+  { value: 'price-high', label: '价格从高到低' },
+]
 
 const filtered = computed(() => products.filter((product) => product.title.includes(keyword.value.trim())))
 </script>
@@ -31,7 +39,9 @@ const filtered = computed(() => products.filter((product) => product.title.inclu
         </div>
         <div class="market-search-row">
           <label class="light-search"><Search /><input v-model="keyword" placeholder="搜索商品、材料、武器..." /></label>
-          <button class="light-select"><SlidersHorizontal /> 综合排序 <ChevronDown /></button>
+          <AppSelect v-model="sortOrder" class="market-sort-select" :options="sortOptions" aria-label="选择商品排序">
+            <template #prefix><SlidersHorizontal /></template>
+          </AppSelect>
           <button class="filter-button"><Filter /> 筛选</button>
         </div>
         <div class="market-filter-chips">
