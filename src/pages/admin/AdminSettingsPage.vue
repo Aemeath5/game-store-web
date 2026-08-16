@@ -30,7 +30,7 @@ const disputeNotificationOptions = [
 
       <article class="admin-card admin-setting-card">
         <header><span><ShieldCheck /><b>交易与风控</b></span><small>审核及安全策略</small></header>
-        <label class="admin-switch-row"><span><b>高价值订单人工复核</b><small>金额超过 2,000 创世星时进入人工审核</small></span><input v-model="manualReview" type="checkbox" /></label>
+        <label class="admin-switch-row"><span><b>高价值订单人工复核</b><small>金额超过 2,000 星币时进入人工审核</small></span><input v-model="manualReview" type="checkbox" /></label>
         <label class="admin-switch-row"><span><b>卖家实名认证审核</b><small>未认证卖家不可发布商品</small></span><input v-model="sellerAudit" type="checkbox" /></label>
         <label class="admin-switch-row"><span><b>维护模式</b><small>开启后普通用户不能进入交易页面</small></span><input v-model="maintenance" type="checkbox" /></label>
       </article>

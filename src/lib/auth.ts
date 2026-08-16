@@ -11,6 +11,7 @@ export interface AuthUser {
   avatar: string
   role: string
   status: string
+  star_coin_balance?: number | null
   genesis_star_balance?: number | null
 }
 

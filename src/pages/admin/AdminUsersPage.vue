@@ -38,7 +38,7 @@ const users = [
       </div>
       <div class="admin-table-wrap">
         <table class="admin-table">
-          <thead><tr><th>用户</th><th>身份</th><th>等级</th><th>成交数</th><th>创世星余额</th><th>状态</th><th>操作</th></tr></thead>
+          <thead><tr><th>用户</th><th>身份</th><th>等级</th><th>成交数</th><th>星币余额</th><th>状态</th><th>操作</th></tr></thead>
           <tbody><tr v-for="user in users" :key="user.email">
             <td><div class="admin-user-cell"><img :src="user.avatar" :alt="user.name" /><span><strong>{{ user.name }}</strong><small>{{ user.email }}</small></span></div></td>
             <td><span class="admin-role"><ShieldCheck v-if="user.role.includes('管理员')" />{{ user.role }}</span></td><td>{{ user.level }}</td><td>{{ user.trades }}</td><td><CurrencyAmount :amount="user.balance" size="xs" class="admin-table-currency" /></td>
