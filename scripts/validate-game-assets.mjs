@@ -88,6 +88,7 @@ if (files.length === 0) {
 
 const undersized = []
 const invalid = []
+let aliasSummary = ''
 
 for (const file of files) {
   try {
@@ -100,8 +101,45 @@ for (const file of files) {
   }
 }
 
+try {
+  const assetDirectory = resolve(iconDirectory, '..')
+  const index = JSON.parse(await readFile(resolve(assetDirectory, 'index.json'), 'utf8'))
+  const aliases = JSON.parse(await readFile(resolve(assetDirectory, 'reliquary-aliases.json'), 'utf8'))
+  const fileSet = new Set(files)
+  const restoredIcons = new Set(aliases.restored_icons)
+
+  for (const iconKey of restoredIcons) {
+    const path = resolve(iconDirectory, `${iconKey}.webp`)
+    if (!fileSet.has(path))
+      invalid.push({ file: path, message: 'restored reliquary icon is missing' })
+  }
+
+  for (const [itemID, sourceID] of Object.entries(aliases.aliases)) {
+    if (index.items[itemID])
+      invalid.push({ file: `reliquary alias ${itemID}`, message: 'alias unexpectedly replaces an indexed item' })
+    const source = index.items[sourceID]
+    if (!source)
+      invalid.push({ file: `reliquary alias ${itemID}`, message: `source item ${sourceID} is missing` })
+    else if (!source.icon && !restoredIcons.has(source.icon_key))
+      invalid.push({ file: `reliquary alias ${itemID}`, message: `source item ${sourceID} has no usable icon` })
+  }
+
+  for (const [itemID, fallback] of Object.entries(aliases.fallbacks)) {
+    if (!fallback.name || fallback.kind !== 'reliquary' || !fallback.icon)
+      invalid.push({ file: `reliquary fallback ${itemID}`, message: 'fallback metadata is incomplete' })
+  }
+
+  aliasSummary = `, ${Object.keys(aliases.aliases).length} reliquary aliases and ${Object.keys(aliases.fallbacks).length} fallbacks`
+}
+catch (error) {
+  invalid.push({
+    file: resolve(iconDirectory, '..', 'reliquary-aliases.json'),
+    message: error instanceof Error ? error.message : String(error),
+  })
+}
+
 if (undersized.length === 0 && invalid.length === 0) {
-  console.log(`Validated ${files.length} WebP icons: every image is at least ${minimumSize}x${minimumSize}.`)
+  console.log(`Validated ${files.length} WebP icons${aliasSummary}: every image is at least ${minimumSize}x${minimumSize}.`)
   process.exit(0)
 }
 
