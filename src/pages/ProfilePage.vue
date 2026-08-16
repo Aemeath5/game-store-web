@@ -49,8 +49,8 @@ const inventoryCount = computed(() => app.inventoryTotal == null ? '—' : numbe
 const playerStatus = computed(() => app.playerLoading ? '同步中' : app.playerError ? '同步失败' : app.playerSnapshot ? '已同步' : '等待同步')
 
 const shortcuts = computed(() => [
-  { label: '我的挂单', path: '/listings', icon: Tag, value: '—' },
-  { label: '购买记录', path: '/orders', icon: ShoppingBag, value: '—' },
+  { label: '挂单', path: '/listings', icon: Tag, value: '—' },
+  { label: '购买', path: '/orders', icon: ShoppingBag, value: '—' },
   { label: '背包', path: '/listings', icon: Boxes, value: inventoryCount.value },
 ])
 
@@ -89,80 +89,69 @@ function logout() {
 </script>
 
 <template>
-  <div class="profile-page-v5">
-    <section class="profile-hero-v5">
-      <div class="profile-cover-v5" :style="{ backgroundImage: `url(${coverSrc})` }">
-        <div class="profile-cover-glow-v5" />
-        <button type="button" class="profile-edit-v5" @click="editing = true" aria-label="编辑商城资料">
-          <Pencil />
-        </button>
-      </div>
+  <div class="profile-page-v6">
+    <section class="profile-stage-v6">
+      <div class="profile-cover-v6" :style="{ backgroundImage: `url(${coverSrc})` }">
+        <div class="profile-cover-overlay-v6" />
+        <button type="button" class="profile-edit-v6" @click="editing = true" aria-label="编辑商城资料"><Pencil /></button>
 
-      <div class="profile-person-v5">
-        <div class="profile-avatar-v5">
-          <img :src="avatarSrc" :alt="app.displayName">
+        <div class="profile-person-v6">
+          <span class="profile-avatar-v6"><img :src="avatarSrc" :alt="app.displayName"></span>
+          <h1>{{ app.displayName }}</h1>
         </div>
-        <h1>{{ app.displayName }}</h1>
       </div>
 
-      <nav class="profile-shortcuts-v5" aria-label="商城快捷入口">
+      <nav class="profile-dock-v6" aria-label="商城快捷入口">
         <RouterLink v-for="item in shortcuts" :key="item.label" :to="item.path">
-          <span class="shortcut-icon-v5"><component :is="item.icon" /></span>
-          <strong>{{ item.value }}</strong>
-          <small>{{ item.label }}</small>
+          <span><component :is="item.icon" /></span>
+          <div><strong>{{ item.value }}</strong><small>{{ item.label }}</small></div>
         </RouterLink>
       </nav>
     </section>
 
-    <main class="profile-body-v5">
-      <section class="profile-game-v5">
-        <header class="profile-game-head-v5">
-          <div class="profile-game-title-v5">
-            <span class="profile-game-icon-v5"><Gamepad2 /></span>
+    <main class="profile-shell-v6">
+      <section class="game-board-v6">
+        <div class="game-board-head-v6">
+          <div class="game-board-user-v6">
+            <span class="game-board-logo-v6"><Gamepad2 /></span>
             <div>
-              <small>已绑定游戏账号</small>
+              <small>游戏账号</small>
               <strong>{{ app.gameDisplayName }}</strong>
+              <p>UID {{ app.playerUid || '—' }}</p>
             </div>
           </div>
-          <span class="profile-sync-v5" :class="{ error: app.playerError }">
-            <CheckCircle2 /> {{ playerStatus }}
-          </span>
-        </header>
-
-        <div class="profile-game-uid-v5">
-          <span>UID</span>
-          <strong>{{ app.playerUid || '—' }}</strong>
+          <span class="game-board-status-v6" :class="{ error: app.playerError }"><CheckCircle2 /> {{ playerStatus }}</span>
         </div>
 
-        <div class="profile-wallet-v5">
-          <div>
-            <span class="wallet-icon-v5"><Sparkles /></span>
+        <div class="wallet-strip-v6">
+          <article>
+            <span><Sparkles /></span>
             <div><small>原石</small><strong>{{ formatAmount(currency?.primogem) }}</strong></div>
-          </div>
-          <div>
-            <span class="wallet-icon-v5"><WalletCards /></span>
+          </article>
+          <article>
+            <span><WalletCards /></span>
             <div><small>摩拉</small><strong>{{ formatAmount(currency?.mora) }}</strong></div>
-          </div>
-          <div>
-            <span class="wallet-icon-v5"><Gem /></span>
+          </article>
+          <article>
+            <span><Gem /></span>
             <div><small>创世结晶</small><strong>{{ formatAmount(currency?.genesis_crystal) }}</strong></div>
-          </div>
+          </article>
         </div>
       </section>
 
-      <section class="profile-tools-v5">
+      <section class="profile-list-v6">
         <button type="button" @click="editing = true">
-          <span><Pencil /></span>
-          <div><strong>编辑商城资料</strong><small>昵称、头像和主页封面</small></div>
+          <span class="list-icon-v6"><Pencil /></span>
+          <div><strong>商城资料</strong><small>昵称、头像和封面</small></div>
           <ChevronRight />
         </button>
         <button type="button">
-          <span><LockKeyhole /></span>
+          <span class="list-icon-v6"><LockKeyhole /></span>
           <div><strong>账户安全</strong><small>密码与登录安全</small></div>
           <ChevronRight />
         </button>
         <button type="button" class="danger" @click="logout">
-          <span><LogOut /></span>
+          <span class="list-icon-v6"><LogOut /></span>
           <div><strong>退出登录</strong><small>退出当前商城账号</small></div>
           <ChevronRight />
         </button>
