@@ -16,15 +16,15 @@
 .wallet-wallet-link { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 9px; color: rgba(255,255,255,.86); background: rgba(255,255,255,.16); }
 .wallet-card__body { padding: 16px 18px; }
 .wallet-balances { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
-.wallet-balance { display: flex; align-items: center; gap: 12px; min-width: 0; min-height: 62px; padding: 8px 0; }
+.wallet-balance { display: flex; align-items: center; gap: 11px; min-width: 0; min-height: 62px; padding: 8px 0; }
 .wallet-balance:nth-child(odd) { padding-right: 16px; border-right: 1px solid rgba(231,238,248,.95); }
 .wallet-balance:nth-child(even) { padding-left: 16px; }
 .wallet-balance:nth-child(n+3) { margin-top: 6px; padding-top: 14px; border-top: 1px solid rgba(231,238,248,.95); }
-.wallet-balance__icon { flex-shrink: 0; width: 44px; height: 44px; object-fit: contain; }
-.wallet-balance__icon--star-coin { transform: scale(1.08); filter: drop-shadow(0 3px 6px rgba(20,111,205,.22)); }
+.wallet-balance__icon { flex-shrink: 0; width: 40px; height: 40px; object-fit: contain; }
+.wallet-balance__icon--star-coin { filter: drop-shadow(0 3px 6px rgba(20,111,205,.22)); }
 .wallet-balance__text { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
-.wallet-balance__num { font-size: 23px; font-weight: 800; color: #14213b; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wallet-balance__label { margin-top: 1px; font-size: 13px; color: #8493a8; }
+.wallet-balance__num { font-size: 22px; font-weight: 800; color: #14213b; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wallet-balance__label { margin-top: 1px; font-size: 12px; color: #8493a8; }
 .wallet-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(231,238,248,.9); }
 .wallet-mini__item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; border-radius: 10px; text-decoration: none; }
 .wallet-mini__item:hover { background: rgba(238,246,255,.8); }
