@@ -11,9 +11,12 @@ import {
   Tag,
   UploadCloud,
 } from 'lucide-vue-next'
+import type { ApiEnvelope } from '@/lib/auth'
+import { apiErrorMessage } from '@/lib/auth'
+import { api } from '@/lib/http'
 import { useAppStore } from '@/stores/app'
 import { loadGameAssetIndex, type GameAssetItem } from '@/lib/gameAssets'
-import type { PlayerInventoryItem } from '@/types/player'
+import type { PlayerInventoryItem, PlayerSnapshot } from '@/types/player'
 
 const app = useAppStore()
 const tab = ref<'inventory' | 'listing' | 'publish'>('inventory')
@@ -23,6 +26,15 @@ const selectedItemKey = ref('')
 const numberFormatter = new Intl.NumberFormat('zh-CN')
 const gameAssets = shallowRef<Record<string, GameAssetItem>>({})
 const gameAssetVersion = ref('')
+const wholeInventoryItems = shallowRef<PlayerInventoryItem[]>([])
+const wholeInventoryVersion = ref<number | null>(null)
+const wholeInventoryTotal = ref(0)
+const wholeInventoryLoading = ref(false)
+const wholeInventoryError = ref('')
+const wholeInventoryPageSize = 500
+const wholeInventoryConcurrency = 2
+let wholeInventoryRequestId = 0
+let wholeInventoryInFlight = false
 
 const categoryPresentation: Record<string, { label: string, image: string }> = {
   material: { label: '材料', image: '/assets/reference/item-orb.svg' },
@@ -36,15 +48,26 @@ const categoryPresentation: Record<string, { label: string, image: string }> = {
 const inventory = computed(() => app.playerSnapshot?.inventory ?? null)
 const inventoryItems = computed(() => inventory.value?.items ?? [])
 const currentPage = computed(() => inventory.value?.page ?? 1)
+const searchActive = computed(() => Boolean(keyword.value.trim()))
+const wholeInventoryFresh = computed(() => {
+  const snapshot = app.playerSnapshot
+  return wholeInventoryVersion.value != null
+    && wholeInventoryVersion.value === snapshot?.data_version
+    && wholeInventoryTotal.value === snapshot?.inventory.total
+    && wholeInventoryItems.value.length === snapshot.inventory.total
+})
+const filterSourceItems = computed(() => searchActive.value && wholeInventoryFresh.value
+  ? wholeInventoryItems.value
+  : inventoryItems.value)
 const pageCount = computed(() => {
   if (!inventory.value?.page_size)
     return 1
   return Math.max(1, Math.ceil(inventory.value.total / inventory.value.page_size))
 })
-const categoryOptions = computed(() => [...new Set(inventoryItems.value.map(item => item.category))].sort())
+const categoryOptions = computed(() => [...new Set(filterSourceItems.value.map(item => item.category))].sort())
 const filteredItems = computed(() => {
   const needle = keyword.value.trim().toLowerCase()
-  return inventoryItems.value.filter((item) => {
+  return filterSourceItems.value.filter((item) => {
     if (categoryFilter.value !== 'all' && item.category !== categoryFilter.value)
       return false
     if (!needle)
@@ -60,6 +83,22 @@ watch(inventoryItems, (items) => {
   if (!items.some(item => item.item_key === selectedItemKey.value && !item.locked))
     selectedItemKey.value = items.find(item => !item.locked)?.item_key ?? ''
 }, { immediate: true })
+
+watch(keyword, () => {
+  if (searchActive.value && !wholeInventoryFresh.value && !wholeInventoryInFlight)
+    void loadWholeInventory()
+})
+
+watch(
+  () => [app.playerSnapshot?.data_version, app.playerSnapshot?.inventory.total] as const,
+  ([version, total], [previousVersion, previousTotal]) => {
+    if (version === previousVersion && total === previousTotal)
+      return
+    invalidateWholeInventory()
+    if (searchActive.value)
+      void loadWholeInventory()
+  },
+)
 
 onMounted(async () => {
   try {
@@ -124,9 +163,80 @@ function formatAmount(value: number | null | undefined) {
   return value == null ? '—' : numberFormatter.format(value)
 }
 
+function invalidateWholeInventory() {
+  wholeInventoryRequestId++
+  wholeInventoryInFlight = false
+  wholeInventoryItems.value = []
+  wholeInventoryVersion.value = null
+  wholeInventoryTotal.value = 0
+  wholeInventoryLoading.value = false
+  wholeInventoryError.value = ''
+}
+
+async function fetchInventoryPage(page: number) {
+  const response = await api.get<ApiEnvelope<PlayerSnapshot>>('/player/me', {
+    params: { page, page_size: wholeInventoryPageSize },
+  })
+  return response.data.data
+}
+
+async function loadWholeInventory() {
+  if (!inventory.value || wholeInventoryFresh.value || wholeInventoryInFlight)
+    return
+
+  const requestId = ++wholeInventoryRequestId
+  wholeInventoryInFlight = true
+  wholeInventoryLoading.value = true
+  wholeInventoryError.value = ''
+
+  try {
+    const firstPage = await fetchInventoryPage(1)
+    const expectedVersion = firstPage.data_version
+    const expectedTotal = firstPage.inventory.total
+    const pages = Math.max(1, Math.ceil(expectedTotal / wholeInventoryPageSize))
+    const items = [...firstPage.inventory.items]
+
+    for (let first = 2; first <= pages; first += wholeInventoryConcurrency) {
+      const pageNumbers = Array.from(
+        { length: Math.min(wholeInventoryConcurrency, pages - first + 1) },
+        (_, index) => first + index,
+      )
+      const snapshots = await Promise.all(pageNumbers.map(page => fetchInventoryPage(page)))
+
+      for (const snapshot of snapshots) {
+        if (snapshot.data_version !== expectedVersion || snapshot.inventory.total !== expectedTotal)
+          throw new Error('背包数据在搜索期间发生了变化，请重试。')
+        items.push(...snapshot.inventory.items)
+      }
+    }
+
+    if (items.length !== expectedTotal)
+      throw new Error('背包数据未完整返回，请重试。')
+
+    if (requestId === wholeInventoryRequestId) {
+      wholeInventoryItems.value = items
+      wholeInventoryVersion.value = expectedVersion
+      wholeInventoryTotal.value = expectedTotal
+    }
+  }
+  catch (cause) {
+    if (requestId === wholeInventoryRequestId)
+      wholeInventoryError.value = apiErrorMessage(cause, '搜索整个背包失败，请稍后重试。')
+  }
+  finally {
+    if (requestId === wholeInventoryRequestId) {
+      wholeInventoryInFlight = false
+      wholeInventoryLoading.value = false
+    }
+  }
+}
+
 async function refreshInventory() {
+  invalidateWholeInventory()
   try {
     await app.loadPlayerSnapshot(currentPage.value, inventory.value?.page_size ?? 100, true)
+    if (searchActive.value)
+      void loadWholeInventory()
   }
   catch {
     // The store exposes the backend error in this page.
@@ -177,7 +287,7 @@ function openPublish(item?: PlayerInventoryItem) {
         <div class="inventory-toolbar panel-light">
           <label class="light-search">
             <Search />
-            <input v-model="keyword" placeholder="在当前页搜索物品名、ID、GUID 或分类...">
+            <input v-model="keyword" placeholder="搜索整个背包的物品名、ID、GUID 或分类...">
           </label>
           <select v-model="categoryFilter" class="light-select inventory-category-select" aria-label="背包分类">
             <option value="all">全部分类</option>
@@ -200,12 +310,21 @@ function openPublish(item?: PlayerInventoryItem) {
         </div>
         <template v-else>
           <div class="inventory-summary">
-            <span>共 {{ formatAmount(inventory.total) }} 件记录，第 {{ inventory.page }} / {{ pageCount }} 页</span>
-            <span v-if="app.playerLoading"><RefreshCw class="spinning" /> 正在更新…</span>
+            <span v-if="searchActive && wholeInventoryFresh">已搜索全部 {{ formatAmount(inventory.total) }} 件记录，找到 {{ formatAmount(filteredItems.length) }} 件</span>
+            <span v-else>共 {{ formatAmount(inventory.total) }} 件记录，第 {{ inventory.page }} / {{ pageCount }} 页</span>
+            <span v-if="searchActive && wholeInventoryLoading"><RefreshCw class="spinning" /> 正在搜索整个背包…</span>
+            <span v-else-if="app.playerLoading"><RefreshCw class="spinning" /> 正在更新…</span>
             <span v-else-if="gameAssetVersion">图鉴 {{ gameAssetVersion }}</span>
           </div>
 
-          <div v-if="filteredItems.length" class="inventory-grid">
+          <div v-if="searchActive && wholeInventoryLoading" class="inventory-state panel-light">
+            <RefreshCw class="spinning" /><div><strong>正在搜索整个背包</strong><p>首次搜索会加载所有背包分页。</p></div>
+          </div>
+          <div v-else-if="searchActive && wholeInventoryError" class="inventory-state inventory-state--error panel-light">
+            <div><strong>全背包搜索失败</strong><p>{{ wholeInventoryError }}</p></div>
+            <button type="button" @click="loadWholeInventory">重试</button>
+          </div>
+          <div v-else-if="filteredItems.length" class="inventory-grid">
             <article v-for="item in filteredItems" :key="item.item_key" class="inventory-card panel-light" :class="{ 'is-locked': item.locked }">
               <span class="inventory-category-badge">{{ categoryLabel(item.category) }}</span>
               <span v-if="item.locked" class="inventory-lock"><LockKeyhole /> 已锁定</span>
@@ -221,10 +340,10 @@ function openPublish(item?: PlayerInventoryItem) {
             </article>
           </div>
           <div v-else class="inventory-state panel-light">
-            <Search /><div><strong>当前页没有匹配道具</strong><p>请清除搜索内容或切换分类。</p></div>
+            <Search /><div><strong>{{ searchActive ? '整个背包没有匹配道具' : '当前页没有匹配道具' }}</strong><p>请清除搜索内容或切换分类。</p></div>
           </div>
 
-          <nav v-if="pageCount > 1" class="inventory-pagination" aria-label="背包分页">
+          <nav v-if="pageCount > 1 && !searchActive" class="inventory-pagination" aria-label="背包分页">
             <button type="button" :disabled="currentPage <= 1 || app.playerLoading" @click="changePage(currentPage - 1)"><ChevronLeft /> 上一页</button>
             <span>{{ currentPage }} / {{ pageCount }}</span>
             <button type="button" :disabled="currentPage >= pageCount || app.playerLoading" @click="changePage(currentPage + 1)">下一页 <ChevronRight /></button>
