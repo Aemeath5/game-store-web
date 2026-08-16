@@ -3,7 +3,7 @@
   .wallet-balance { gap: 7px; }
   .wallet-balance__icon { width: 30px; height: 30px; }
   .wallet-balance__num { font-size: 17px; }
-  .wallet-voucher__label { display: none; }
+  .wallet-currency__label { display: none; }
   .market-card__image-wrap { height: 120px; }
   .market-card__tags span:nth-child(2) { display: none; }
   .profile-info p { max-width: 180px; }

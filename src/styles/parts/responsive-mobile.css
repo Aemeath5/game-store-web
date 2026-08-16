@@ -28,8 +28,8 @@
   .wallet-card__body { padding: 14px 16px; }
   .wallet-balance__icon { width: 34px; height: 34px; }
   .wallet-balance__num { font-size: 19px; }
-  .wallet-voucher { padding: 8px 10px; }
-  .wallet-voucher__expire { font-size: 9px; padding: 2px 6px; }
+  .wallet-currency { padding: 8px 10px; }
+  .wallet-currency__hint { font-size: 9px; padding: 2px 6px; }
   .quick-grid { grid-template-columns: repeat(3,1fr); gap: 8px; }
   .quick-cell { padding: 12px 4px; }
   .market-stats { grid-template-columns: repeat(2,1fr); gap: 4px 0; padding: 4px 0; }
@@ -63,7 +63,7 @@
   .market-card__body { padding: 10px; }
   .market-card__body h3 { font-size: 13px; }
   .market-card__meta { display: none; }
-  .market-card__footer strong { font-size: 18px; }
+  .market-card__price { font-size: 18px; }
   .market-card__seller { max-width: 78px; }
 
   .breadcrumb { margin-bottom: 10px; }
@@ -73,7 +73,7 @@
   .detail-info { padding: 18px; }
   .detail-info h1 { font-size: 24px; }
   .detail-price { margin: 17px 0; }
-  .detail-price strong { font-size: 34px; }
+  .detail-price__amount { font-size: 34px; }
   .detail-actions { grid-template-columns: 1fr 1.3fr; }
   .detail-lower { margin-top: 12px; gap: 12px; }
   .detail-description, .seller-card { padding: 16px; border-radius: 13px; }

@@ -35,5 +35,4 @@
 .market-card__meta span { display: inline-flex; align-items: center; gap: 4px; }
 .market-card__footer { display: flex; align-items: end; justify-content: space-between; gap: 8px; margin-top: 11px; padding-top: 10px; border-top: 1px solid #edf2f8; }
 .market-card__seller { color: #8493a8; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.market-card__footer strong { color: #e35c28; font-size: 21px; line-height: 1; }
-.market-card__footer small { margin-right: 2px; font-size: 11px; }
+.market-card__price { color: #176fcf; font-size: 21px; font-weight: 850; line-height: 1; }

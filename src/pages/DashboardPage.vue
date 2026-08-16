@@ -19,6 +19,8 @@ import {
   WalletCards,
   Zap,
 } from 'lucide-vue-next'
+import CurrencyAmount from '@/components/ui/CurrencyAmount.vue'
+import { GENESIS_STAR_ICON, GENESIS_STAR_NAME } from '@/lib/currency'
 import { useAppStore } from '@/stores/app'
 
 const app = useAppStore()
@@ -28,6 +30,7 @@ const moraIcon = '/game-assets/icons/UI_ItemIcon_202.webp'
 const numberFormatter = new Intl.NumberFormat('zh-CN')
 const primogem = computed(() => app.playerSnapshot?.currency.primogem)
 const mora = computed(() => app.playerSnapshot?.currency.mora)
+const genesisStarBalance = computed(() => app.genesisStarBalance)
 const inventoryTotal = computed(() => app.inventoryTotal)
 const playerStatus = computed(() => {
   if (app.playerLoading)
@@ -116,13 +119,13 @@ const activities = [
                 </div>
               </div>
 
-              <div class="wallet-voucher">
-                <span class="voucher-ticket">🎟️</span>
-                <div class="wallet-voucher__text">
-                  <strong class="wallet-voucher__num">—</strong>
-                  <span class="wallet-voucher__label">商城凭证</span>
+              <div class="wallet-currency">
+                <img :src="GENESIS_STAR_ICON" :alt="GENESIS_STAR_NAME" class="wallet-currency__icon" />
+                <div class="wallet-currency__text">
+                  <strong class="wallet-currency__amount">{{ formatAmount(genesisStarBalance) }}</strong>
+                  <span class="wallet-currency__label">{{ GENESIS_STAR_NAME }}</span>
                 </div>
-                <span class="wallet-voucher__expire">功能尚未接入</span>
+                <span class="wallet-currency__hint">{{ genesisStarBalance == null ? '余额接口待接入' : '商城专属货币' }}</span>
               </div>
 
               <div class="wallet-mini">
@@ -165,7 +168,7 @@ const activities = [
         </div>
         <div class="mstat">
           <div class="mstat__body"><strong class="mstat__num">677.2 万</strong><span class="mstat__label"><i class="mstat__dot dot-volume" />累计成交额</span></div>
-          <img :src="moraIcon" alt="" class="mstat__coin" />
+          <img :src="GENESIS_STAR_ICON" :alt="GENESIS_STAR_NAME" class="mstat__coin" />
         </div>
         <div class="mstat">
           <div class="mstat__body"><strong class="mstat__num">1,217</strong><span class="mstat__label"><i class="mstat__dot dot-total" />历史挂单</span></div>
@@ -216,7 +219,7 @@ const activities = [
               <li v-for="item in activities" :key="item.text" class="activity-item">
                 <span class="activity-icon" :class="`act-${item.type}`"><ReceiptText /></span>
                 <span class="activity-body"><span class="activity-content">{{ item.text }}</span><span class="activity-time">{{ item.time }}</span></span>
-                <strong class="activity-amount">{{ item.amount }}</strong>
+                <CurrencyAmount :amount="item.amount" size="sm" class="activity-amount" />
               </li>
             </ul>
           </section>

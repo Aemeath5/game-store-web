@@ -22,12 +22,12 @@
 .wallet-balance__text { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
 .wallet-balance__num { font-size: 22px; font-weight: 800; color: #14213b; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .wallet-balance__label { font-size: 12px; color: #8493a8; }
-.wallet-voucher { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 9px 12px; border-radius: 12px; background: rgba(255,247,232,.86); border: 1px dashed rgba(217,119,6,.4); }
-.voucher-ticket { font-size: 18px; }
-.wallet-voucher__text { display: flex; align-items: baseline; gap: 6px; flex-shrink: 0; }
-.wallet-voucher__num { font-size: 15px; font-weight: 800; color: #b45309; }
-.wallet-voucher__label { font-size: 12px; color: #c2810a; }
-.wallet-voucher__expire { margin-left: auto; flex-shrink: 0; padding: 2px 9px; border-radius: 999px; background: rgba(214,90,58,.12); color: #d65a3a; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.wallet-currency { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 9px 12px; border-radius: 12px; background: linear-gradient(120deg,rgba(231,246,255,.96),rgba(238,241,255,.94)); border: 1px solid rgba(70,153,235,.28); }
+.wallet-currency__icon { flex: 0 0 auto; width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 3px 5px rgba(20,111,205,.22)); }
+.wallet-currency__text { display: flex; align-items: baseline; gap: 6px; flex-shrink: 0; }
+.wallet-currency__amount { font-size: 16px; font-weight: 850; color: #176fcf; font-variant-numeric: tabular-nums; }
+.wallet-currency__label { font-size: 12px; color: #5385bd; font-weight: 700; }
+.wallet-currency__hint { margin-left: auto; flex-shrink: 0; padding: 2px 9px; border-radius: 999px; background: rgba(65,126,221,.10); color: #557db7; font-size: 10px; font-weight: 700; white-space: nowrap; }
 .wallet-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(231,238,248,.9); }
 .wallet-mini__item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; border-radius: 10px; text-decoration: none; }
 .wallet-mini__item:hover { background: rgba(238,246,255,.8); }
