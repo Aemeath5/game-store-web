@@ -9,6 +9,7 @@ export interface AuthUser {
   game_uid: number
   nickname: string
   avatar: string
+  cover: string
   role: string
   status: string
   star_coin_balance?: number | null
@@ -41,16 +42,12 @@ export function clearAccessToken() {
 export function apiErrorMessage(error: unknown, fallback: string) {
   if (!axios.isAxiosError(error))
     return fallback
-
   const message = error.response?.data?.error?.message
   if (typeof message === 'string' && message.trim())
     return message
-
   if (error.code === 'ECONNABORTED')
     return '请求超时，请稍后重试。'
-
   if (!error.response)
     return '无法连接商城服务，请确认后端已启动。'
-
   return fallback
 }
