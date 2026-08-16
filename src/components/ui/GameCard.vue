@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Eye, ShieldCheck } from 'lucide-vue-next'
+import CurrencyAmount from '@/components/ui/CurrencyAmount.vue'
 import type { Product } from '@/types/market'
 
 defineProps<{ product: Product }>()
@@ -23,7 +24,7 @@ defineProps<{ product: Product }>()
       </div>
       <div class="market-card__footer">
         <span class="market-card__seller">{{ product.seller }} · Lv.{{ product.sellerLevel }}</span>
-        <strong><small>¥</small>{{ product.price }}</strong>
+        <CurrencyAmount :amount="product.price" size="sm" class="market-card__price" />
       </div>
     </div>
   </RouterLink>

@@ -17,8 +17,7 @@
 .detail-tags span { padding: 5px 9px; border-radius: 8px; background: #f6f9fd; border: 1px solid #e6edf7; color: #687a92; font-size: 11px; }
 .detail-price { display: flex; align-items: end; justify-content: space-between; margin: 22px 0; padding: 17px 0; border-top: 1px solid #edf2f8; border-bottom: 1px solid #edf2f8; }
 .detail-price > span { color: #8493a8; font-size: 12px; }
-.detail-price strong { color: #e35c28; font-size: 42px; line-height: 1; }
-.detail-price small { font-size: 16px; margin-right: 4px; }
+.detail-price__amount { color: #176fcf; font-size: 42px; font-weight: 850; line-height: 1; }
 .detail-rows { display: grid; gap: 10px; }
 .detail-rows > div { display: flex; justify-content: space-between; gap: 20px; padding-bottom: 10px; border-bottom: 1px dashed #e5edf8; font-size: 12.5px; }
 .detail-rows span { color: #8493a8; }

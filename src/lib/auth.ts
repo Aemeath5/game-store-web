@@ -11,6 +11,7 @@ export interface AuthUser {
   avatar: string
   role: string
   status: string
+  genesis_star_balance?: number | null
 }
 
 export interface ApiEnvelope<T> {

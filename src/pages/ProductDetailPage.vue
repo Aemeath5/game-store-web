@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   ShoppingCart,
 } from 'lucide-vue-next'
+import CurrencyAmount from '@/components/ui/CurrencyAmount.vue'
 import { products } from '@/data/products'
 
 const route = useRoute()
@@ -34,11 +35,12 @@ const product = computed(() => products.find((item) => item.id === Number(route.
           <h1>{{ product.title }}</h1>
           <p class="detail-subtitle">库存充足，支持平台担保交易与快速交付。</p>
           <div class="detail-tags"><span v-for="tag in product.tags" :key="tag">{{ tag }}</span></div>
-          <div class="detail-price"><span>当前售价</span><strong><small>¥</small>{{ product.price }}</strong></div>
+          <div class="detail-price"><span>当前售价</span><CurrencyAmount :amount="product.price" size="lg" show-name class="detail-price__amount" /></div>
           <div class="detail-rows">
             <div><span>商品等级</span><strong>Lv.{{ product.level }}</strong></div>
             <div><span>库存数量</span><strong>99+</strong></div>
             <div><span>交付方式</span><strong>游戏内邮件 / 面交</strong></div>
+            <div><span>结算货币</span><strong>创世星</strong></div>
             <div><span>售后保障</span><strong>平台争议处理</strong></div>
           </div>
           <div class="detail-actions">

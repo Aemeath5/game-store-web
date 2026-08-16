@@ -21,5 +21,16 @@
 .light-search input:focus { border-color: #71a7f8; box-shadow: 0 0 0 3px rgba(36,108,240,.08); background: #fff; }
 .filter-button { height: 42px; display: inline-flex; align-items: center; gap: 7px; border: 1px solid #246cf0; border-radius: 10px; background: #246cf0; color: #fff; padding: 0 13px; font-size: 12.5px; font-weight: 650; cursor: pointer; }
 
+/* Mall currency */
+.currency-amount { display: inline-flex; align-items: center; gap: .25em; min-width: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.currency-amount__icon { flex: 0 0 auto; width: 1em; height: 1em; object-fit: contain; filter: drop-shadow(0 .08em .12em rgba(20,111,205,.22)); }
+.currency-amount__value { min-width: 0; }
+.currency-amount__name { margin-left: .12em; color: #6d819e; font-size: .42em; font-weight: 700; }
+.currency-amount--xs { gap: .18em; }
+.currency-amount--xs .currency-amount__icon { width: .82em; height: .82em; }
+.currency-amount--sm .currency-amount__icon { width: .9em; height: .9em; }
+.currency-amount--lg { gap: .3em; }
+.currency-amount--lg .currency-amount__icon { width: 1.08em; height: 1.08em; }
+
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinning { animation: spin .9s linear infinite; }
