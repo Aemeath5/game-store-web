@@ -32,7 +32,7 @@ const orders = [
       </div>
       <div class="admin-table-wrap">
         <table class="admin-table">
-          <thead><tr><th>订单号</th><th>买家</th><th>卖家</th><th>商品</th><th>金额（创世星）</th><th>下单时间</th><th>状态</th><th>操作</th></tr></thead>
+          <thead><tr><th>订单号</th><th>买家</th><th>卖家</th><th>商品</th><th>金额（星币）</th><th>下单时间</th><th>状态</th><th>操作</th></tr></thead>
           <tbody><tr v-for="order in orders" :key="order.id">
             <td><strong>{{ order.id }}</strong></td><td>{{ order.buyer }}</td><td>{{ order.seller }}</td><td>{{ order.item }}</td><td><CurrencyAmount :amount="order.amount" size="xs" class="admin-table-currency" /></td><td>{{ order.created }}</td>
             <td><span class="admin-status" :class="order.status === '已完成' ? 'status-success' : order.status === '争议中' ? 'status-danger' : order.status === '人工复核' ? 'status-info' : 'status-warning'">{{ order.status }}</span></td>

@@ -40,7 +40,7 @@ const product = computed(() => products.find((item) => item.id === Number(route.
             <div><span>商品等级</span><strong>Lv.{{ product.level }}</strong></div>
             <div><span>库存数量</span><strong>99+</strong></div>
             <div><span>交付方式</span><strong>游戏内邮件 / 面交</strong></div>
-            <div><span>结算货币</span><strong>创世星</strong></div>
+            <div><span>结算货币</span><strong>星币</strong></div>
             <div><span>售后保障</span><strong>平台争议处理</strong></div>
           </div>
           <div class="detail-actions">

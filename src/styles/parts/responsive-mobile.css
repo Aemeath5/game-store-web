@@ -25,11 +25,13 @@
   .hero-carousel__caption { height: 34px; padding: 0 11px; font-size: 11px; }
   .wallet-card { border-radius: 13px; }
   .wallet-card__head { padding: 12px 14px; }
-  .wallet-card__body { padding: 14px 16px; }
-  .wallet-balance__icon { width: 34px; height: 34px; }
-  .wallet-balance__num { font-size: 19px; }
-  .wallet-currency { padding: 8px 10px; }
-  .wallet-currency__hint { font-size: 9px; padding: 2px 6px; }
+  .wallet-card__body { padding: 16px 18px; }
+  .wallet-balance { gap: 10px; min-height: 60px; }
+  .wallet-balance:nth-child(odd) { padding-right: 12px; }
+  .wallet-balance:nth-child(even) { padding-left: 12px; }
+  .wallet-balance__icon { width: 42px; height: 42px; }
+  .wallet-balance__num { font-size: 22px; }
+  .wallet-balance__label { font-size: 13px; }
   .quick-grid { grid-template-columns: repeat(3,1fr); gap: 8px; }
   .quick-cell { padding: 12px 4px; }
   .market-stats { grid-template-columns: repeat(2,1fr); gap: 4px 0; padding: 4px 0; }

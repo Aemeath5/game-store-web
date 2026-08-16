@@ -3,6 +3,7 @@ export type InventoryCategory = 'material' | 'furniture' | 'equip' | 'weapon' | 
 export interface PlayerCurrency {
   primogem: number
   mora: number
+  genesis_crystal?: number | null
 }
 
 export interface PlayerInventoryItem {

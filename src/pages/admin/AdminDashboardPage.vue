@@ -37,7 +37,7 @@ const orders = [
 const pending = [
   { title: '高价值商品待审核', count: 8, hint: '含 3 个账号类商品', icon: BadgeCheck },
   { title: '争议订单待处理', count: 3, hint: '最长等待 42 分钟', icon: Clock3 },
-  { title: '创世星划转待复核', count: 6, hint: '合计 12,860 创世星', icon: CircleDollarSign },
+  { title: '星币划转待复核', count: 6, hint: '合计 12,860 星币', icon: CircleDollarSign },
 ]
 
 const trend = [42, 58, 49, 68, 62, 78, 72, 91, 84, 96, 88, 100]

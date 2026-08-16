@@ -49,7 +49,7 @@ const filtered = computed(() => products.filter((product) => product.title.inclu
         </div>
       </section>
 
-      <div class="market-summary"><span>共找到 {{ filtered.length }} 个商品</span><span>创世星结算 · 平台担保</span></div>
+      <div class="market-summary"><span>共找到 {{ filtered.length }} 个商品</span><span>星币结算 · 平台担保</span></div>
 
       <section class="market-layout">
         <aside class="market-sidebar panel-light">

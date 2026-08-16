@@ -27,7 +27,11 @@ export const useAppStore = defineStore('app', () => {
   })
   const playerUid = computed(() => playerSnapshot.value?.uid || currentUser.value?.game_uid || 0)
   const inventoryTotal = computed(() => playerSnapshot.value?.inventory.total ?? null)
-  const genesisStarBalance = computed(() => currentUser.value?.genesis_star_balance ?? null)
+  const starCoinBalance = computed(() =>
+    currentUser.value?.star_coin_balance
+    ?? currentUser.value?.genesis_star_balance
+    ?? null,
+  )
   const userInitial = computed(() => displayName.value.slice(0, 1).toUpperCase())
 
   function setAuthenticatedUser(user: AuthUser) {
@@ -102,7 +106,7 @@ export const useAppStore = defineStore('app', () => {
     displayName,
     playerUid,
     inventoryTotal,
-    genesisStarBalance,
+    starCoinBalance,
     userInitial,
     setAuthenticatedUser,
     hydrateCurrentUser,

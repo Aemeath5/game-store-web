@@ -51,7 +51,7 @@ const filtered = computed(() => products.filter(item => (
     <section class="admin-card">
       <div class="admin-table-wrap">
         <table class="admin-table admin-product-table">
-          <thead><tr><th>商品</th><th>分类</th><th>卖家</th><th>价格（创世星）</th><th>库存</th><th>状态</th><th>操作</th></tr></thead>
+          <thead><tr><th>商品</th><th>分类</th><th>卖家</th><th>价格（星币）</th><th>库存</th><th>状态</th><th>操作</th></tr></thead>
           <tbody>
             <tr v-for="item in filtered" :key="item.id">
               <td><div class="admin-product-cell"><img :src="item.image" :alt="item.name" /><span><strong>{{ item.name }}</strong><small>#{{ item.id }}</small></span></div></td>

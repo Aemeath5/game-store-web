@@ -20,17 +20,23 @@ import {
   Zap,
 } from 'lucide-vue-next'
 import CurrencyAmount from '@/components/ui/CurrencyAmount.vue'
-import { GENESIS_STAR_ICON, GENESIS_STAR_NAME } from '@/lib/currency'
+import { STAR_COIN_ICON, STAR_COIN_NAME } from '@/lib/currency'
 import { useAppStore } from '@/stores/app'
 
 const app = useAppStore()
+const GENESIS_CRYSTAL_ITEM_ID = 203
 const primogemIcon = '/game-assets/icons/UI_ItemIcon_201.webp'
 const moraIcon = '/game-assets/icons/UI_ItemIcon_202.webp'
+const genesisCrystalIcon = `/game-assets/icons/UI_ItemIcon_${GENESIS_CRYSTAL_ITEM_ID}.webp`
 
 const numberFormatter = new Intl.NumberFormat('zh-CN')
 const primogem = computed(() => app.playerSnapshot?.currency.primogem)
 const mora = computed(() => app.playerSnapshot?.currency.mora)
-const genesisStarBalance = computed(() => app.genesisStarBalance)
+const genesisCrystal = computed(() =>
+  app.playerSnapshot?.currency.genesis_crystal
+  ?? app.playerSnapshot?.inventory.items.find(item => item.item_id === GENESIS_CRYSTAL_ITEM_ID)?.count,
+)
+const starCoinBalance = computed(() => app.starCoinBalance)
 const inventoryTotal = computed(() => app.inventoryTotal)
 const playerStatus = computed(() => {
   if (app.playerLoading)
@@ -109,7 +115,6 @@ const activities = [
                     <span class="wallet-balance__label">原石</span>
                   </div>
                 </div>
-                <span class="wallet-balances__divider" />
                 <div class="wallet-balance">
                   <img :src="moraIcon" alt="摩拉" class="wallet-balance__icon" />
                   <div class="wallet-balance__text">
@@ -117,15 +122,20 @@ const activities = [
                     <span class="wallet-balance__label">摩拉</span>
                   </div>
                 </div>
-              </div>
-
-              <div class="wallet-currency">
-                <img :src="GENESIS_STAR_ICON" :alt="GENESIS_STAR_NAME" class="wallet-currency__icon" />
-                <div class="wallet-currency__text">
-                  <strong class="wallet-currency__amount">{{ formatAmount(genesisStarBalance) }}</strong>
-                  <span class="wallet-currency__label">{{ GENESIS_STAR_NAME }}</span>
+                <div class="wallet-balance">
+                  <img :src="genesisCrystalIcon" alt="结晶" class="wallet-balance__icon" />
+                  <div class="wallet-balance__text">
+                    <strong class="wallet-balance__num">{{ formatAmount(genesisCrystal) }}</strong>
+                    <span class="wallet-balance__label">结晶</span>
+                  </div>
                 </div>
-                <span class="wallet-currency__hint">{{ genesisStarBalance == null ? '余额接口待接入' : '商城专属货币' }}</span>
+                <div class="wallet-balance" :title="starCoinBalance == null ? '余额接口待接入' : '商城专属货币'">
+                  <img :src="STAR_COIN_ICON" :alt="STAR_COIN_NAME" class="wallet-balance__icon wallet-balance__icon--star-coin" />
+                  <div class="wallet-balance__text">
+                    <strong class="wallet-balance__num">{{ formatAmount(starCoinBalance) }}</strong>
+                    <span class="wallet-balance__label">{{ STAR_COIN_NAME }}</span>
+                  </div>
+                </div>
               </div>
 
               <div class="wallet-mini">
@@ -168,7 +178,7 @@ const activities = [
         </div>
         <div class="mstat">
           <div class="mstat__body"><strong class="mstat__num">677.2 万</strong><span class="mstat__label"><i class="mstat__dot dot-volume" />累计成交额</span></div>
-          <img :src="GENESIS_STAR_ICON" :alt="GENESIS_STAR_NAME" class="mstat__coin" />
+          <img :src="STAR_COIN_ICON" :alt="STAR_COIN_NAME" class="mstat__coin" />
         </div>
         <div class="mstat">
           <div class="mstat__body"><strong class="mstat__num">1,217</strong><span class="mstat__label"><i class="mstat__dot dot-total" />历史挂单</span></div>
