@@ -10,6 +10,7 @@
 @import "./parts/inventory.css";
 @import "./parts/chat.css";
 @import "./parts/profile.css";
+@import "./parts/profile-store.css";
 @import "./parts/orders.css";
 @import "./parts/responsive-tablet.css";
 @import "./parts/responsive-mobile.css";
